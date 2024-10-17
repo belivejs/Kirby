@@ -18,7 +18,8 @@ function init(){
         1000 // 먼 절단면
     );
 
-    DataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
+    dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
+    // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -59,7 +60,7 @@ function animate() {
  * // 콘솔 결과
  * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
  */
-function DataLoader(path, fileName){
+function dataLoader(path, fileName){
     loader.load(
         path, // 3D data 경로.
         function (gltf) { // Data 불러오는 함수
