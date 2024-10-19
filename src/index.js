@@ -10,6 +10,7 @@ var renderer;
 var controls;
 var loader = new GLTFLoader(); // 3D data loader
 
+//keyCode
 const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
 let kirbyScene;
 
@@ -43,6 +44,8 @@ function init(){
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(10, 10, 10);
     scene.add(light);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
     // 집
     const house = new House(scene, 50);
