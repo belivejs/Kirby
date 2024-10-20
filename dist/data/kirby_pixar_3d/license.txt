@@ -1,0 +1,11 @@
+Model Information:
+* title:	Kirby Pixar (3D)
+* source:	https://sketchfab.com/3d-models/kirby-pixar-3d-b316ccdfffe24240a058eef113e62a04
+* author:	BlueTheTCFandFSPandTCSFan2022 Second Account (https://sketchfab.com/kemari.deric)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Kirby Pixar (3D)" (https://sketchfab.com/3d-models/kirby-pixar-3d-b316ccdfffe24240a058eef113e62a04) by BlueTheTCFandFSPandTCSFan2022 Second Account (https://sketchfab.com/kemari.deric) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

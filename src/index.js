@@ -18,8 +18,10 @@ function init(){
         1000 // 먼 절단면
     );
 
-    dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
+    // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
     // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
+    var kirby = new THREE.Object3D();
+    dataLoader('data/kirby_pixar_3d/scene.gltf', kirby);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -36,7 +38,8 @@ function init(){
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(10, 10, 10);
-    scene.add(light);
+    kirby.add(light);
+    scene.add(kirby);
 
     // 집
     const house = new House(scene, 50);
@@ -50,23 +53,20 @@ function animate() {
 }
 
 /**
- * Data 파일을 로드하고 씬에 추가하기 위한 함수입니다.
+ * Data 파일을 로드하고 target 에 로드한 object를 저장합니다.
  * GLB 파일을 권장합니다.
  * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
- * @param {string} fileName 로드한 파일의 이름. console에 찍어서 데이터 형식을 확인하려고 사용함.
- * @returns {null} 리턴은 없는데 객체 형태로 내보내고 싶어요.. 근데 안됨
+ * @param {string} target 로드한 파일을 받을 object.
+ * @returns {null}
  * @example // 사용 예
- * DataLoader('data/kirby_pixar_3d.glb', '커비')
- * // 콘솔 결과
- * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
+ * var kirby = new THREE.Object3D();
+ * DataLoader('data/kirby_pixar_3d.glb', kirby);
  */
-function dataLoader(path, fileName){
+function dataLoader(path, target){
     loader.load(
         path, // 3D data 경로.
         function (gltf) { // Data 불러오는 함수
-            console.log(fileName, gltf);
-            const characterMesh = gltf;
-            scene.add(gltf.scene);
+            target.add(gltf.scene);
         },
         undefined, 
         function (error) {// 실패 시 에러 출력
