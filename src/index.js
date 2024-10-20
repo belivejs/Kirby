@@ -53,14 +53,14 @@ function animate() {
 }
 
 /**
- * Data 파일을 로드하고 target 에 로드한 object를 저장합니다.
+ * Data 파일을 로드하고 target에 load한 object를 저장합니다.
  * GLB 파일을 권장합니다.
  * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
  * @param {string} target 로드한 파일을 받을 object.
  * @returns {null}
  * @example // 사용 예
  * var kirby = new THREE.Object3D();
- * DataLoader('data/kirby_pixar_3d.glb', kirby);
+ * dataLoader('data/kirby_pixar_3d.glb', '커비')
  */
 function dataLoader(path, target){
     loader.load(
@@ -74,7 +74,6 @@ function dataLoader(path, target){
         }
     );
 }
-
 
 init();
 animate();
