@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import House from './house.js';
+import {initializeTimer} from './timer.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -8,6 +9,9 @@ var camera;
 var renderer;
 var controls;
 var loader = new GLTFLoader(); // 3D data loader
+let kirby, sunMesh, moonMesh;
+let updatePositions; // 회전 로직을 저장하는 변수
+let gameTicks = 60; // game이 흘러가는 시간 비율, 1분에 하루
 
 function init(){
     scene = new THREE.Scene();
@@ -20,8 +24,9 @@ function init(){
 
     // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
     // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
-    var kirby = new THREE.Object3D();
-    dataLoader('data/kirby_pixar_3d/scene.gltf', kirby);
+    kirby = new THREE.Object3D();
+    dataLoader('./data/kirby_pixar_3d.glb', kirby);
+    scene.add(kirby);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -36,12 +41,27 @@ function init(){
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
-    kirby.add(light);
-    scene.add(kirby);
+    // 태양 light source 추가
+    const sunLight = new THREE.DirectionalLight(0xff0000, 3); // 빨간빛, 강도 3
+    scene.add(sunLight);
+    // 태양을 표현하기 위한 구체 추가
+    const sunGeometry = new THREE.SphereGeometry(1, 32, 32); // 반지름 1, 세부 사항 32
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // 빨간색
+    sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+    scene.add(sunMesh); // 씬에 추가
 
-    // 집
+    // 달 light source 추가
+    const moonLight = new THREE.DirectionalLight(0x808080, 0.5); // 회색빛, 강도 0.5
+    scene.add(moonLight);
+    // 달을 표현하기 위한 구체 추가
+    const moonGeometry = new THREE.SphereGeometry(1, 32, 32); // 반지름 1, 세부 사항 32
+    const moonMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 }); // 회색
+    moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+    scene.add(moonMesh); // 씬에 추가
+
+    // timer.js의 initializeTimer 함수로 회전 로직을 생성
+    updatePositions = initializeTimer(gameTicks, sunLight, moonLight, sunMesh, moonMesh, kirby);
+
     const house = new House(scene, 50);
     // house.init();
 }
@@ -49,6 +69,11 @@ function init(){
 function animate() {
     requestAnimationFrame(animate);
     controls.update(); // OrbitControls 업데이트
+
+    if (updatePositions) {
+        updatePositions(); // 태양과 달의 위치를 업데이트
+    }
+
     renderer.render(scene, camera);
 }
 
