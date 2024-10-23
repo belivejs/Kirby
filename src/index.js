@@ -13,6 +13,9 @@ var loader = new GLTFLoader(); // 3D data loader
 //keyCode
 const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
 let kirbyScene;
+//animation
+var mixer;
+var previousTime;
 
 
 function init(){
@@ -24,8 +27,15 @@ function init(){
         1000 // 먼 절단면
     );
 
-    // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
-    dataLoader('data/kirby.glb', 'kirby Model');
+    dataLoader('data/kirby_pixar_3d.glb', 'kirby Model')
+    .then(gltf => {
+        kirbyScene = gltf.scene
+        objectAnimation(gltf.animations);
+    });
+    // dataLoader('data/kirby.glb', 'kirby Model')
+    // .then(gltf => {
+    //     kirbyScene = gltf.scene
+    // });
     // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
 
     renderer = new THREE.WebGLRenderer();
@@ -49,13 +59,29 @@ function init(){
 
     // 집
     const house = new House(scene, 50);
-    house.init()
+    // house.init()
 
     //keyboard event
     document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+
+
+    requestAnimationFrame(animate);
 }
 
-function animate() {
+
+function update(time){
+    time *= 0.001; // second unit
+
+    if(mixer) {
+        const deltaTime = time - previousTime;
+        mixer.update(deltaTime);
+    }
+    previousTime = time;
+}
+
+
+function animate(time) {
+    update(time);
     requestAnimationFrame(animate);
     controls.update(); // OrbitControls 업데이트
     renderer.render(scene, camera);
@@ -73,19 +99,41 @@ function animate() {
  * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
  */
 function dataLoader(path, fileName){
-    loader.load(
-        path, // 3D data 경로.
-        function (gltf) { // Data 불러오는 함수
-            console.log(fileName, gltf);
-            const characterMesh = gltf;
-            kirbyScene = gltf.scene;
-            scene.add(kirbyScene);
-        },
-        undefined, 
-        function (error) {// 실패 시 에러 출력
-            console.error(error);
-        }
-    );
+    return new Promise((resolve, reject) => { //gltf를 리턴으로 받기위해 비동기 처리
+        loader.load(
+            path, // 3D data 경로.
+            function (gltf) { // Data 불러오는 함수
+                console.log(fileName, gltf);
+                const characterMesh = gltf;
+                scene.add(gltf.scene);
+
+                //성공적으로 로드 된 경우 gltf resolve
+                resolve(gltf);
+            },
+            undefined, 
+            function (error) {// 실패 시 에러 출력
+                console.error(error);
+                reject(error);
+            }
+        );
+    })
+    
+}
+
+function objectAnimation(animations){
+    //에니메이션
+    const animationClips = animations
+    console.log(animationClips);
+    const newMixer = new THREE.AnimationMixer(kirbyScene);
+    const animationsMap = {};
+    animationClips.forEach(clip => {
+        const name = clip.name;
+        console.log("name", name);
+        animationsMap[name] = newMixer.clipAction(clip); // THREE.AnimationAction
+    });
+
+    mixer = newMixer;
+    animationsMap["Take 01"].play();
 }
 
 /**
@@ -94,9 +142,9 @@ function dataLoader(path, fileName){
  */
 function moveKirbyByKeyBoard(e){
     if(e.keyCode == LEFT){
-        kirbyScene.position.x -= 0.5;
-    } else if (e.keyCode == RIGHT){
         kirbyScene.position.x += 0.5;
+    } else if (e.keyCode == RIGHT){
+        kirbyScene.position.x -= 0.5;
     } else if (e.keyCode == FRONT){
         kirbyScene.position.z += 0.5;
     } else if (e.keyCode == BACK){
