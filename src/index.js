@@ -27,15 +27,17 @@ function init(){
         1000 // 먼 절단면
     );
 
-    dataLoader('data/kirby_pixar_3d.glb', 'kirby Model')
-    .then(gltf => {
-        kirbyScene = gltf.scene
-        objectAnimation(gltf.animations);
-    });
-    // dataLoader('data/kirby.glb', 'kirby Model')
+    // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model')
     // .then(gltf => {
     //     kirbyScene = gltf.scene
+    //     objectAnimation(gltf.animations);
     // });
+    dataLoader('data/kirby.glb', 'kirby Model')
+    .then(gltf => {
+        kirbyScene = gltf.scene
+        setColor(kirbyScene, "hotpink");
+    });
+
     // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
 
     renderer = new THREE.WebGLRenderer();
@@ -59,7 +61,7 @@ function init(){
 
     // 집
     const house = new House(scene, 50);
-    // house.init()
+    house.init()
 
     //keyboard event
     document.addEventListener('keydown', moveKirbyByKeyBoard, false)
@@ -119,7 +121,7 @@ function dataLoader(path, fileName){
     })
     
 }
-
+//object animation
 function objectAnimation(animations){
     //에니메이션
     const animationClips = animations
@@ -136,6 +138,20 @@ function objectAnimation(animations){
     animationsMap["Take 01"].play();
 }
 
+/** object 색 설정
+* @param {} objectScene 모델 scene
+* @param {string} color 미리 정의된 컬러 이름(hotpink)이나 컬러 코드(#000000)
+*/
+function setColor(objectScene, color){
+    objectScene.traverse(object => { //scene내부 모든 객체들을 하나씩 순회
+        console.log("이름",object.name, "타입", object.type); 
+        if(object.isMesh){
+            object.material.color.set(color);
+        }
+    })
+    scene.add(objectScene);
+
+}
 /**
  * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
  * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
