@@ -66,7 +66,7 @@ function init(){
     const house = new House(scene, 50);
     house.init()
 
-    new Kirby(scene, renderer, camera);
+    new Kirby(scene, renderer, camera, controls);
 
 
 

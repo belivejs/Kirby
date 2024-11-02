@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
 class Kirby{
-    constructor(scene, renderer, camera){
+    constructor(scene, renderer, camera, orbitControls){
         this._scene = scene;
 
         // const renderer = new THREE.WebGLRenderer();
@@ -16,6 +16,7 @@ class Kirby{
 
         this._renderer = renderer;
         this._camera = camera;
+        this._controls = orbitControls;
 
         this._setupModel();
         this._setupControl();
@@ -101,6 +102,7 @@ class Kirby{
         }
     }
 
+    _previousDirectionOffset = 0;
     //방향별로 offset을 줘서 캐릭터가 이동하는 방향을 바라보도록 하기
     _directionOffset(){
         const pressedKeys = this._pressedKeys;
@@ -125,10 +127,15 @@ class Kirby{
             directionOffset = Math.PI / 2 // a (90도)
         } else if (pressedKeys['d']) {
             directionOffset = - Math.PI / 2 // d (-90도)
+        } else {
+            directionOffset = this._previousDirectionOffset;
         }
+
+        this._previousDirectionOffset = directionOffset;
 
         return directionOffset;        
     }
+
 
     _speed = 0;
     _maxSpeed = 0;
@@ -177,11 +184,18 @@ class Kirby{
             // 방향 속도 합치기
             const moveX = walkDirection.x * (this._speed * deltaTime);
             const moveZ = walkDirection.z * (this._speed * deltaTime);
-           // 이동
+            //캐릭터 이동
             this._model.position.x += moveX;
             this._model.position.z += moveZ; 
-
-
+            //카메라 이동
+            this._camera.position.x += moveX;
+            this._camera.position.z += moveZ;
+            //카메라가 바라보는 타겟을 캐릭터로 
+            this._controls.target.set(
+                this._model.position.x,
+                this._model.position.y,
+                this._model.position.z,
+            );         
 
         }
         this._previousTime = time;
