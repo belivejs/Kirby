@@ -100,39 +100,42 @@ class Kirby{
         }
     }
 
-    changeAnimation(animationName, loopOption = null, nextAnimation = null){
-        if(this._currentAnimationAction){
-            this._currentAnimationAction.getMixer().removeEventListener('finished'); //기존 리스너 제거
-        }
+    changeAnimation(animationName, loopOption = null, nextAnimation = null, clamp = false){
         var previousAnimationAction = this._currentAnimationAction;
         this._currentAnimationAction = this._animationMap[animationName];
-
+        
+        if(this._currentAnimationAction && clamp){
+            this._currentAnimationAction.clampWhenFinished = true; //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
+        }
         //애니메이션 반복 옵션
         if(loopOption)
             this._currentAnimationAction.setLoop(loopOption)
 
-        this._currentAnimationAction.clampWhenFinished = true; //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
         this.smoothChange(previousAnimationAction)
 
-        previousAnimationAction = this._currentAnimationAction;
-        this._currentAnimationAction = this._animationMap[nextAnimation];
-
-        if(this._currentAnimationAction){
-        //1번 애니메이션이 끝나면 2번 애니메이션 시작
-        this._currentAnimationAction.getMixer().addEventListener('finished', () => {
-            this.smoothChange(previousAnimationAction)
-        });        
-    }
+        //두번째 애니메이션
+        if(nextAnimation){
+            previousAnimationAction = this._currentAnimationAction;
+            this._currentAnimationAction = this._animationMap[nextAnimation];
+            //1번 애니메이션이 끝나면 2번 애니메이션 시작
+            this._currentAnimationAction.getMixer().addEventListener('finished', () => {
+                this.smoothChange(previousAnimationAction)
+            });        
+        }
 
 
     }
 
     setupAnimations(){
         document.getElementById('work').onclick = () => {
-            this.changeAnimation("seat", THREE.LoopOnce, 'work'); //애니메이션 한 번만 실행
+            this.changeAnimation(null)
+            this.changeAnimation("seat", THREE.LoopOnce, 'work', true); //애니메이션 한 번만 실행
         }
         document.getElementById('stand').onclick = () => {
-            this.changeAnimation("stand", THREE.LoopOnce, null);
+            this.changeAnimation(null, null, null);
+        }
+        document.getElementById('sleep').onclick = () => {
+            this.changeAnimation("sleep");
         }
     }
 
