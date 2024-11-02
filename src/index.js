@@ -11,15 +11,6 @@ var renderer;
 var controls;
 var loader = new GLTFLoader(); // 3D data loader
 
-//keyCode
-const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
-//animation
-var mixer;
-var previousTime;
-var kirbyGltf;
-const kirbyAnimationsMap = {}; //커비에 들어있는 애니메이션 목록을 저장
-
-
 
 function init(){
     scene = new THREE.Scene();
@@ -31,18 +22,6 @@ function init(){
     );
 
     
-    // dataLoader('data/kirby_angry_face.glb', 'kirby', 0.2).then((gltf) => {
-    //     kirbyGltf = gltf;
-    //     // setColor(kirbyGltf.scene, "hotpink"); //색 입히기
-    //     objectAnimation(kirbyGltf.scene, kirbyGltf.animations)
-    //     document.addEventListener('keydown', moveKirbyByKeyBoard, false);
-    //     document.addEventListener('keyup', stopKirbyByKeyBoard, false);
-    // }).catch((error) => {
-    //     console.error("Failed to load model:", error);
-    // });
-
-    // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
-
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -74,18 +53,7 @@ function init(){
 }
 
 
-function controlAnimation(time){
-    time *= 0.001; // second unit
-    if(mixer) {
-        const deltaTime = time - previousTime;
-        mixer.update(deltaTime);
-    }
-    previousTime = time;
-}
-
-
 function animate(time) {
-    controlAnimation(time);
     requestAnimationFrame(animate);
     controls.update(); // OrbitControls 업데이트
     renderer.render(scene, camera);
@@ -104,7 +72,6 @@ function animate(time) {
  * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
  */
 function dataLoader(path, fileName, scale=1) {
-    return new Promise((resolve, reject) => {
         loader.load(
             path, // 3D data 경로.
             function (gltf) { // Data 불러오는 함수
@@ -113,46 +80,12 @@ function dataLoader(path, fileName, scale=1) {
                 var mesh = gltf.scene.children[0];
                 mesh.scale.set(scale,scale,scale);
                 scene.add(gltf.scene);
-
-                // 성공적으로 로드된 경우 resolve
-                resolve(gltf);
             },
             undefined,
             function (error) { // 실패 시 에러 출력
                 console.error(error);
-                reject(error);
             }
         );
-    });
-}
-
-//object animation
-function objectAnimation(scene, animations){
-    //에니메이션
-    const animationClips = animations
-    console.log(animationClips);
-    const newMixer = new THREE.AnimationMixer(scene);
-    animationClips.forEach(clip => {
-        const name = clip.name;
-        console.log("name", name);
-        kirbyAnimationsMap[name] = newMixer.clipAction(clip); // THREE.AnimationAction
-    });
-
-    mixer = newMixer;
-    // animationsMap["walk"].play(); //animationClips:name에 들어있는 이름이어야함
-}
-//애니메이션 시작
-function startAnimation(actionTitle) {
-    if (kirbyAnimationsMap[actionTitle] && !kirbyAnimationsMap[actionTitle].isRunning()) {
-        kirbyAnimationsMap[actionTitle].play()
-        console.log('start')
-    }
-}
-// 애니메이션 멈춤
-function stopAnimation(actionTitle) {
-    if (kirbyAnimationsMap[actionTitle] && kirbyAnimationsMap[actionTitle].isRunning()) {
-        kirbyAnimationsMap[actionTitle].stop()
-    }
 }
 
 /** object 색 설정
@@ -168,38 +101,6 @@ function setColor(objectScene, color){
     })
     scene.add(objectScene);
 
-}
-
-
-/**
- * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
- * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
- */
-function moveKirbyByKeyBoard(e){
-    if(e.keyCode == LEFT){
-        kirbyGltf.scene.position.x += 0.5;
-        startAnimation('walk')
-    } else if (e.keyCode == RIGHT){
-        kirbyGltf.scene.position.x -= 0.5;
-        startAnimation('walk')
-    } else if (e.keyCode == FRONT){
-        kirbyGltf.scene.position.z += 0.5;
-        startAnimation('walk')
-    } else if (e.keyCode == BACK){
-        kirbyGltf.scene.position.z -= 0.5;
-        startAnimation('walk')
-    }
-}
-function stopKirbyByKeyBoard(e){
-    if(e.keyCode == LEFT){
-        stopAnimation('walk')
-    } else if (e.keyCode == RIGHT){
-        stopAnimation('walk')
-    } else if (e.keyCode == FRONT){
-        stopAnimation('walk')
-    } else if (e.keyCode == BACK){
-        stopAnimation('walk')
-    }
 }
 
 
