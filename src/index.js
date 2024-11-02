@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import House from './house.js';
+import Kirby from './kirby.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -29,21 +30,16 @@ function init(){
         1000 // 먼 절단면
     );
 
-    // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model')
-    // .then(gltf => {
-    //     kirbyScene = gltf.scene
-    //     objectAnimation(gltf.animations);
+    
+    // dataLoader('data/kirby_angry_face.glb', 'kirby', 0.2).then((gltf) => {
+    //     kirbyGltf = gltf;
+    //     // setColor(kirbyGltf.scene, "hotpink"); //색 입히기
+    //     objectAnimation(kirbyGltf.scene, kirbyGltf.animations)
+    //     document.addEventListener('keydown', moveKirbyByKeyBoard, false);
+    //     document.addEventListener('keyup', stopKirbyByKeyBoard, false);
+    // }).catch((error) => {
+    //     console.error("Failed to load model:", error);
     // });
-
-    dataLoader('data/kirby_angry_face.glb', 'kirby', 0.2).then((gltf) => {
-        kirbyGltf = gltf;
-        // setColor(kirbyGltf.scene, "hotpink");
-        objectAnimation(kirbyGltf.scene, kirbyGltf.animations)
-        document.addEventListener('keydown', moveKirbyByKeyBoard, false);
-        document.addEventListener('keyup', stopKirbyByKeyBoard, false);
-    }).catch((error) => {
-        console.error("Failed to load model:", error);
-    });
 
     // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
 
@@ -70,6 +66,7 @@ function init(){
     const house = new House(scene, 50);
     house.init()
 
+    new Kirby(scene, renderer, camera);
 
 
 
@@ -196,8 +193,6 @@ function moveKirbyByKeyBoard(e){
 function stopKirbyByKeyBoard(e){
     if(e.keyCode == LEFT){
         stopAnimation('walk')
-        console.log("key up left"); 
-
     } else if (e.keyCode == RIGHT){
         stopAnimation('walk')
     } else if (e.keyCode == FRONT){
