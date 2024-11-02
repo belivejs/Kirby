@@ -83,44 +83,56 @@ class Kirby{
         if(previousAnimationAction == null && this._currentAnimationAction == null){
         } 
         else if(previousAnimationAction == null){
+            console.log('previous null');
+
             this._currentAnimationAction.reset().fadeIn(0.5).play();
         }
         else if (this._currentAnimationAction == null){
+            console.log('current null');
+
             previousAnimationAction.fadeOut(0.5);
         } 
         else if (previousAnimationAction !== this._currentAnimationAction) {
+            console.log('not null');
+
             previousAnimationAction.fadeOut(0.5);
             this._currentAnimationAction.reset().fadeIn(0.5).play();
         }
     }
 
     changeAnimation(animationName, loopOption = null, nextAnimation = null){
-        const previousAnimationAction = this._currentAnimationAction;
+        if(this._currentAnimationAction){
+            this._currentAnimationAction.getMixer().removeEventListener('finished'); //기존 리스너 제거
+        }
+        var previousAnimationAction = this._currentAnimationAction;
         this._currentAnimationAction = this._animationMap[animationName];
 
         //애니메이션 반복 옵션
         if(loopOption)
             this._currentAnimationAction.setLoop(loopOption)
 
+        this._currentAnimationAction.clampWhenFinished = true; //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
         this.smoothChange(previousAnimationAction)
 
-        if (nextAnimation){
-            this._currentAnimationAction.clampWhenFinished = true; //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
+        previousAnimationAction = this._currentAnimationAction;
+        this._currentAnimationAction = this._animationMap[nextAnimation];
 
-            //1번 애니메이션이 끝나면 2번 애니메이션 시작
-            this._currentAnimationAction.getMixer().removeEventListener('finished'); //기존 리스너 제거
-            this._currentAnimationAction.getMixer().addEventListener('finished', () => {
-                const previousAnimationAction = this._currentAnimationAction;
-                this._currentAnimationAction = this._animationMap[nextAnimation];
-                this.smoothChange(previousAnimationAction)
-            });        
-        }
+        if(this._currentAnimationAction){
+        //1번 애니메이션이 끝나면 2번 애니메이션 시작
+        this._currentAnimationAction.getMixer().addEventListener('finished', () => {
+            this.smoothChange(previousAnimationAction)
+        });        
+    }
+
 
     }
 
     setupAnimations(){
         document.getElementById('work').onclick = () => {
             this.changeAnimation("seat", THREE.LoopOnce, 'work'); //애니메이션 한 번만 실행
+        }
+        document.getElementById('stand').onclick = () => {
+            this.changeAnimation("stand", THREE.LoopOnce, null);
         }
     }
 
