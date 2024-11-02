@@ -6,14 +6,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 class Kirby{
     constructor(scene, renderer, camera, orbitControls){
         this._scene = scene;
-
-        // const renderer = new THREE.WebGLRenderer();
-        // renderer.setSize(window.innerWidth, window.innerHeight);
-        // document.body.appendChild(renderer.domElement);
-
-        // renderer.shadowMap.enabled = true;
-        // renderer.shadowMap.type = THREE.VSMShadowMap;
-
         this._renderer = renderer;
         this._camera = camera;
         this._controls = orbitControls;
@@ -48,12 +40,9 @@ class Kirby{
             this._mixer = mixer;
             this._animationMap = animationsMap;
             this._currentAnimationAction = null;
-
             this._model = model;  
-            console.log("model position: ", this._model.position.x,":", this._model.position.y)
 
-
-
+            this.setupAnimations();
         })
     }
 
@@ -72,9 +61,9 @@ class Kirby{
         });
     }
 
+    //걷기 애니메이션 처리
     _processAnimation(){
         const previousAnimationAction = this._currentAnimationAction;
-
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
             this._currentAnimationAction = this._animationMap["walk"];      
             this._maxSpeed = 40;
@@ -86,13 +75,16 @@ class Kirby{
             this._acceleration = 0;
         }
         
+        this.smoothChange(previousAnimationAction);
+    }
 
-        //애니메이션 전환시 부드럽게
+    //부드러운 애니메이션 전환
+    smoothChange(previousAnimationAction){
         if(previousAnimationAction == null && this._currentAnimationAction == null){
         } 
         else if(previousAnimationAction == null){
             this._currentAnimationAction.reset().fadeIn(0.5).play();
-        } 
+        }
         else if (this._currentAnimationAction == null){
             previousAnimationAction.fadeOut(0.5);
         } 
@@ -102,8 +94,38 @@ class Kirby{
         }
     }
 
-    _previousDirectionOffset = 0;
+    changeAnimation(animationName, loopOption = null, nextAnimation = null){
+        const previousAnimationAction = this._currentAnimationAction;
+        this._currentAnimationAction = this._animationMap[animationName];
+
+        //애니메이션 반복 옵션
+        if(loopOption)
+            this._currentAnimationAction.setLoop(loopOption)
+
+        this.smoothChange(previousAnimationAction)
+
+        if (nextAnimation){
+            this._currentAnimationAction.clampWhenFinished = true; //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
+
+            //1번 애니메이션이 끝나면 2번 애니메이션 시작
+            this._currentAnimationAction.getMixer().removeEventListener('finished'); //기존 리스너 제거
+            this._currentAnimationAction.getMixer().addEventListener('finished', () => {
+                const previousAnimationAction = this._currentAnimationAction;
+                this._currentAnimationAction = this._animationMap[nextAnimation];
+                this.smoothChange(previousAnimationAction)
+            });        
+        }
+
+    }
+
+    setupAnimations(){
+        document.getElementById('work').onclick = () => {
+            this.changeAnimation("seat", THREE.LoopOnce, 'work'); //애니메이션 한 번만 실행
+        }
+    }
+
     //방향별로 offset을 줘서 캐릭터가 이동하는 방향을 바라보도록 하기
+    _previousDirectionOffset = 0;
     _directionOffset(){
         const pressedKeys = this._pressedKeys;
         let directionOffset = 0; //기본 : 정면
@@ -196,6 +218,9 @@ class Kirby{
                 this._model.position.y,
                 this._model.position.z,
             );         
+
+
+
 
         }
         this._previousTime = time;
