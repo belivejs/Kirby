@@ -12,10 +12,12 @@ var loader = new GLTFLoader(); // 3D data loader
 
 //keyCode
 const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
-let kirbyScene;
 //animation
 var mixer;
 var previousTime;
+var kirbyGltf;
+const kirbyAnimationsMap = {}; //커비에 들어있는 애니메이션 목록을 저장
+
 
 
 function init(){
@@ -32,10 +34,15 @@ function init(){
     //     kirbyScene = gltf.scene
     //     objectAnimation(gltf.animations);
     // });
-    dataLoader('data/kirby.glb', 'kirby Model')
-    .then(gltf => {
-        kirbyScene = gltf.scene
-        setColor(kirbyScene, "hotpink");
+
+    dataLoader('data/kirby_angry_face.glb', 'kirby', 0.2).then((gltf) => {
+        kirbyGltf = gltf;
+        // setColor(kirbyGltf.scene, "hotpink");
+        objectAnimation(kirbyGltf.scene, kirbyGltf.animations)
+        document.addEventListener('keydown', moveKirbyByKeyBoard, false);
+        document.addEventListener('keyup', stopKirbyByKeyBoard, false);
+    }).catch((error) => {
+        console.error("Failed to load model:", error);
     });
 
     // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
@@ -63,17 +70,15 @@ function init(){
     const house = new House(scene, 50);
     house.init()
 
-    //keyboard event
-    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+
 
 
     requestAnimationFrame(animate);
 }
 
 
-function update(time){
+function controlAnimation(time){
     time *= 0.001; // second unit
-
     if(mixer) {
         const deltaTime = time - previousTime;
         mixer.update(deltaTime);
@@ -83,7 +88,7 @@ function update(time){
 
 
 function animate(time) {
-    update(time);
+    controlAnimation(time);
     requestAnimationFrame(animate);
     controls.update(); // OrbitControls 업데이트
     renderer.render(scene, camera);
@@ -94,48 +99,63 @@ function animate(time) {
  * GLB 파일을 권장합니다.
  * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
  * @param {string} fileName 로드한 파일의 이름. console에 찍어서 데이터 형식을 확인하려고 사용함.
+ * @param {float} scale 스케일할 크기 : 0.5면 원래 크기의 0.5배로 렌더링됨
  * @returns {null} 리턴은 없는데 객체 형태로 내보내고 싶어요.. 근데 안됨
  * @example // 사용 예
  * DataLoader('data/kirby_pixar_3d.glb', '커비')
  * // 콘솔 결과
  * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
  */
-function dataLoader(path, fileName){
-    return new Promise((resolve, reject) => { //gltf를 리턴으로 받기위해 비동기 처리
+function dataLoader(path, fileName, scale=1) {
+    return new Promise((resolve, reject) => {
         loader.load(
             path, // 3D data 경로.
             function (gltf) { // Data 불러오는 함수
                 console.log(fileName, gltf);
-                const characterMesh = gltf;
+                const characterMesh = gltf; //mesh
+                var mesh = gltf.scene.children[0];
+                mesh.scale.set(scale,scale,scale);
                 scene.add(gltf.scene);
 
-                //성공적으로 로드 된 경우 gltf resolve
+                // 성공적으로 로드된 경우 resolve
                 resolve(gltf);
             },
-            undefined, 
-            function (error) {// 실패 시 에러 출력
+            undefined,
+            function (error) { // 실패 시 에러 출력
                 console.error(error);
                 reject(error);
             }
         );
-    })
-    
+    });
 }
+
 //object animation
-function objectAnimation(animations){
+function objectAnimation(scene, animations){
     //에니메이션
     const animationClips = animations
     console.log(animationClips);
-    const newMixer = new THREE.AnimationMixer(kirbyScene);
-    const animationsMap = {};
+    const newMixer = new THREE.AnimationMixer(scene);
     animationClips.forEach(clip => {
         const name = clip.name;
         console.log("name", name);
-        animationsMap[name] = newMixer.clipAction(clip); // THREE.AnimationAction
+        kirbyAnimationsMap[name] = newMixer.clipAction(clip); // THREE.AnimationAction
     });
 
     mixer = newMixer;
-    animationsMap["Take 01"].play();
+    // animationsMap["walk"].play(); //animationClips:name에 들어있는 이름이어야함
+}
+//애니메이션 시작
+function startAnimation(actionTitle) {
+    if (kirbyAnimationsMap[actionTitle] && !kirbyAnimationsMap[actionTitle].isRunning()) {
+        kirbyAnimationsMap[actionTitle].play()
+        console.log('start')
+    }
+}
+// 애니메이션 멈춤
+function stopAnimation(actionTitle) {
+    if (kirbyAnimationsMap[actionTitle] && kirbyAnimationsMap[actionTitle].isRunning()) {
+        kirbyAnimationsMap[actionTitle].stop()
+    }
 }
 
 /** object 색 설정
@@ -152,19 +172,38 @@ function setColor(objectScene, color){
     scene.add(objectScene);
 
 }
+
+
 /**
  * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
  * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
  */
 function moveKirbyByKeyBoard(e){
     if(e.keyCode == LEFT){
-        kirbyScene.position.x += 0.5;
+        kirbyGltf.scene.position.x += 0.5;
+        startAnimation('walk')
     } else if (e.keyCode == RIGHT){
-        kirbyScene.position.x -= 0.5;
+        kirbyGltf.scene.position.x -= 0.5;
+        startAnimation('walk')
     } else if (e.keyCode == FRONT){
-        kirbyScene.position.z += 0.5;
+        kirbyGltf.scene.position.z += 0.5;
+        startAnimation('walk')
     } else if (e.keyCode == BACK){
-        kirbyScene.position.z -= 0.5;
+        kirbyGltf.scene.position.z -= 0.5;
+        startAnimation('walk')
+    }
+}
+function stopKirbyByKeyBoard(e){
+    if(e.keyCode == LEFT){
+        stopAnimation('walk')
+        console.log("key up left"); 
+
+    } else if (e.keyCode == RIGHT){
+        stopAnimation('walk')
+    } else if (e.keyCode == FRONT){
+        stopAnimation('walk')
+    } else if (e.keyCode == BACK){
+        stopAnimation('walk')
     }
 }
 
