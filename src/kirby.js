@@ -18,8 +18,8 @@ class Kirby{
     }
 
     //커비 모델 불러오고 애니메이션 세팅
-    _setupModel(){
-        new GLTFLoader().load('data/kirby_dirty_face.glb', (gltf) => {
+    _setupModel(path = 'data/kirby_dirty_face.glb'){
+        new GLTFLoader().load(path, (gltf) => {
             var scale = 0.2;
             
             //커비 에셋을 scene에 등록
@@ -43,6 +43,7 @@ class Kirby{
             this._model = model;  
 
             this.setupAnimations();
+            this.setupTexture();
         })
     }
 
@@ -114,14 +115,16 @@ class Kirby{
         var previousAnimationAction = this._currentAnimationAction;
         this._currentAnimationAction = this._animationMap[animationName];
     
-
+        //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
         if(this._currentAnimationAction && clamp){
-            this._currentAnimationAction.clampWhenFinished = true; //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
+            this._currentAnimationAction.clampWhenFinished = true; 
         }
+
         //애니메이션 반복 옵션
         if(loopOption)
             this._currentAnimationAction.setLoop(loopOption, repetitions)
 
+        //실행
         this.smoothChange(previousAnimationAction)
 
         //두번째 애니메이션
@@ -150,6 +153,23 @@ class Kirby{
             this.changeAnimation("cleaning", THREE.LoopPingPong, 2, null, false);
         }
     }
+
+    setupTexture(){
+        // document.getElementById('dirty').onclick = () => {  
+        //     this._setupModel('data/kirby_dirty_face.glb')
+        // }
+        // document.getElementById('angry').onclick = () => {
+        //     this._setupModel('data/kirby_angry_face.glb')
+        // }
+        // document.getElementById('sleeping').onclick = () => {
+        //     console.log('sleep');
+        //     this._setupModel('data/kirby_sleeping_face.glb')
+        // }
+        // document.getElementById('base').onclick = () => {
+        //     this._setupModel('data/kirby_base.glb')
+        // }
+    }
+
 
     //방향별로 offset을 줘서 캐릭터가 이동하는 방향을 바라보도록 하기
     _previousDirectionOffset = 0;
