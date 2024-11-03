@@ -39,7 +39,7 @@ class House {
         this.length = length;
     }
 
-    getLength() {
+    static getLength() {
         return this.length;
     }
 
@@ -68,6 +68,10 @@ class House {
 
     getRightWallColor() {
         return this.rightWallColor;
+    }
+
+    static getFloor() {
+        return this.floor;
     }
 }
 
