@@ -85,8 +85,8 @@ function chooseFurniture(){
             }
 
             Furniture.selected(selectedFurniture);
+            console.log(Furniture.getFurnitureName(selectedFurniture));
         }
-        console.log(Furniture.currentFurniture);
     }
 
     let intersectedObject = null;
@@ -151,7 +151,7 @@ function furnitureUI() {
             const listItem = document.createElement('li');
             listItem.innerHTML = `<a href="#">${furniture}</a>`;
             listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, furniture);
+                const furnitureInstance = new Furniture(scene, furniture, furniture);
                 furnitureInstance.add();
             });
             list.appendChild(listItem);
@@ -167,7 +167,12 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-function animate(time) {
+
+
+
+
+// 애니메이션 루프
+function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
