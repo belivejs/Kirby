@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import House from './house.js';
+import Kirby from './kirby.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -9,10 +10,6 @@ var camera;
 var renderer;
 var controls;
 var loader = new GLTFLoader(); // 3D data loader
-
-//keyCode
-const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
-let kirbyScene;
 
 
 function init(){
@@ -24,10 +21,7 @@ function init(){
         1000 // 먼 절단면
     );
 
-    // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
-    dataLoader('data/kirby.glb', 'kirby Model');
-    // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
-
+    
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -51,11 +45,15 @@ function init(){
     const house = new House(scene, 50);
     house.init()
 
-    //keyboard event
-    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+    new Kirby(scene, renderer, camera, controls);
+
+
+
+    requestAnimationFrame(animate);
 }
 
-function animate() {
+
+function animate(time) {
     requestAnimationFrame(animate);
     controls.update(); // OrbitControls 업데이트
     renderer.render(scene, camera);
@@ -66,42 +64,43 @@ function animate() {
  * GLB 파일을 권장합니다.
  * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
  * @param {string} fileName 로드한 파일의 이름. console에 찍어서 데이터 형식을 확인하려고 사용함.
+ * @param {float} scale 스케일할 크기 : 0.5면 원래 크기의 0.5배로 렌더링됨
  * @returns {null} 리턴은 없는데 객체 형태로 내보내고 싶어요.. 근데 안됨
  * @example // 사용 예
  * DataLoader('data/kirby_pixar_3d.glb', '커비')
  * // 콘솔 결과
  * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
  */
-function dataLoader(path, fileName){
-    loader.load(
-        path, // 3D data 경로.
-        function (gltf) { // Data 불러오는 함수
-            console.log(fileName, gltf);
-            const characterMesh = gltf;
-            kirbyScene = gltf.scene;
-            scene.add(kirbyScene);
-        },
-        undefined, 
-        function (error) {// 실패 시 에러 출력
-            console.error(error);
-        }
-    );
+function dataLoader(path, fileName, scale=1) {
+        loader.load(
+            path, // 3D data 경로.
+            function (gltf) { // Data 불러오는 함수
+                console.log(fileName, gltf);
+                const characterMesh = gltf; //mesh
+                var mesh = gltf.scene.children[0];
+                mesh.scale.set(scale,scale,scale);
+                scene.add(gltf.scene);
+            },
+            undefined,
+            function (error) { // 실패 시 에러 출력
+                console.error(error);
+            }
+        );
 }
 
-/**
- * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
- * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
- */
-function moveKirbyByKeyBoard(e){
-    if(e.keyCode == LEFT){
-        kirbyScene.position.x -= 0.5;
-    } else if (e.keyCode == RIGHT){
-        kirbyScene.position.x += 0.5;
-    } else if (e.keyCode == FRONT){
-        kirbyScene.position.z += 0.5;
-    } else if (e.keyCode == BACK){
-        kirbyScene.position.z -= 0.5;
-    }
+/** object 색 설정
+* @param {} objectScene 모델 scene
+* @param {string} color 미리 정의된 컬러 이름(hotpink)이나 컬러 코드(#000000)
+*/
+function setColor(objectScene, color){
+    objectScene.traverse(object => { //scene내부 모든 객체들을 하나씩 순회
+        console.log("이름",object.name, "타입", object.type); 
+        if(object.isMesh){
+            object.material.color.set(color);
+        }
+    })
+    scene.add(objectScene);
+
 }
 
 
