@@ -39,19 +39,16 @@ function init(){
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(10, 10, 10);
     scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
 
     // 집 생성
     const house = new House(scene, 100);
     house.init();
   
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-    new Kirby(scene, renderer, camera, controls);
-
-
+    new Kirby(scene, renderer, camera, controls);    
 
     requestAnimationFrame(animate);
-    
 }
 
 // 가구 선택
@@ -217,7 +214,8 @@ function setColor(objectScene, color){
 
 }
 
-furnitureUI();
+
 init();
+furnitureUI();
 chooseFurniture();
 animate();

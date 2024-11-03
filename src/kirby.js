@@ -93,12 +93,13 @@ class Kirby{
 
             previousAnimationAction.fadeOut(0.5);
         } 
-        else {
-            console.log('not null');
+        else if (this._currentAnimationAction !== previousAnimationAction){
+            console.log('current null');
 
             previousAnimationAction.fadeOut(0.5);
-            this._currentAnimationAction.reset().fadeIn(0.5).play();
-        }
+            this._currentAnimationAction.reset().fadeIn(0.5).play();        
+        } 
+
     }
 
     /**
@@ -140,7 +141,6 @@ class Kirby{
 
     setupAnimations(){
         document.getElementById('work').onclick = () => {
-            this.changeAnimation(null)
             this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행
         }
         document.getElementById('stand').onclick = () => {
