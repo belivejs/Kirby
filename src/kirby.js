@@ -18,7 +18,7 @@ class Kirby{
     }
 
     //커비 모델 불러오고 애니메이션 세팅
-    _setupModel(path = 'data/kirby_dirty_face.glb'){
+    _setupModel(path = 'data/kirby_base.glb'){
         new GLTFLoader().load(path, (gltf) => {
             var scale = 0.2;
             
@@ -155,19 +155,60 @@ class Kirby{
     }
 
     setupTexture(){
-        // document.getElementById('dirty').onclick = () => {  
-        //     this._setupModel('data/kirby_dirty_face.glb')
-        // }
-        // document.getElementById('angry').onclick = () => {
-        //     this._setupModel('data/kirby_angry_face.glb')
-        // }
-        // document.getElementById('sleeping').onclick = () => {
-        //     console.log('sleep');
-        //     this._setupModel('data/kirby_sleeping_face.glb')
-        // }
-        // document.getElementById('base').onclick = () => {
-        //     this._setupModel('data/kirby_base.glb')
-        // }
+        document.getElementById('dirty').onclick = () => {  
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_dirty.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_dirty.jpg")
+        }
+        document.getElementById('angry').onclick = () => {
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_angry.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_angry.jpg")
+        }
+        document.getElementById('sleeping').onclick = () => {
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_sleeping.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_sleeping.jpg")
+        }
+        document.getElementById('base').onclick = () => {
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")        }
+    }
+
+    changeBobyTexture(model, texturePath){
+        const textureLoader = new THREE.TextureLoader();
+        console.log(model);
+        textureLoader.load(texturePath, (texture) => {
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    console.log(child);
+                    if(child.name == 'Kirby_Kirby_0'){
+                        texture.colorSpace = 'srgb'
+                        texture.flipY = false;
+                        child.material.map = texture;
+                        child.material.needsUpdate = true;
+                    }
+                }
+            });
+        }, undefined, (error) => {
+            console.error(`Failed to load texture: ${texturePath}`, error);
+        });
+    }
+    changeFaceTexture(model, texturePath) {
+        const textureLoader = new THREE.TextureLoader();
+        console.log(model);
+        textureLoader.load(texturePath, (texture) => {
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.name == 'Kirby_Kirby_Face_0'){
+                    // 모델의 기본 텍스처를 새 텍스처로 교체
+                        texture.colorSpace = 'srgb'
+                        texture.flipY = false;
+                        child.material.map = texture;
+                        child.material.needsUpdate = true;
+                    }
+                }
+            });
+        }, undefined, (error) => {
+            console.error(`Failed to load texture: ${texturePath}`, error);
+        });
     }
 
 
@@ -265,10 +306,6 @@ class Kirby{
                 this._model.position.y,
                 this._model.position.z,
             );         
-
-
-
-
         }
         this._previousTime = time;
     }
