@@ -145,10 +145,11 @@ function furnitureUI() {
         list.innerHTML = '';
 
         furnitureArray.forEach(furniture => {
+            const furnitureName = furniture.split('/')[2]
             const listItem = document.createElement('li');
             listItem.innerHTML = `<a href="#">${furniture}</a>`;
             listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, furniture);
+                const furnitureInstance = new Furniture(scene, furniture, furnitureName);
                 furnitureInstance.add();
             });
             list.appendChild(listItem);
