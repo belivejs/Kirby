@@ -5,6 +5,7 @@ import House from './house.js';
 class Furniture {
     static currentFurniture = null;
     static furnitureList = [];
+    static furnitureModelList =[];
 
     constructor(scene, path, furnitureName, position = { x: 25, y: 0, z: 25 }) {
         this.scene = scene;
@@ -36,6 +37,7 @@ class Furniture {
             this.model.position.y += House.groundHeight - modelBottomY;
 
             Furniture.furnitureList.push(this);
+            Furniture.furnitureModelList.push(this.model);
 
             if(ifSelect){
                 Furniture.currentFurniture = this;

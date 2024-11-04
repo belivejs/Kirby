@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import Furniture from './furniture';
 
 
 class Kirby{
@@ -26,6 +27,7 @@ class Kirby{
             const model = gltf.scene;
             var mesh = gltf.scene.children[0];
             mesh.scale.set(scale,scale,scale);
+            model.position.set(40,1,40)
             this._scene.add(model);
 
             //커비 에셋 안에 있는 animation들 꺼내기
@@ -36,11 +38,14 @@ class Kirby{
                 console.log(name);
                 animationsMap[name] = mixer.clipAction(clip);
             })
+            const kirbyBox = new THREE.Box3().setFromObject(model);
 
             this._mixer = mixer;
             this._animationMap = animationsMap;
             this._currentAnimationAction = null;
             this._model = model;  
+            this._kirbyBox = kirbyBox;
+
 
             this.setupAnimations();
             this.setupTexture();
@@ -66,7 +71,8 @@ class Kirby{
     _processAnimation(){
         const previousAnimationAction = this._currentAnimationAction;
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
-            this._currentAnimationAction = this._animationMap["walk"];      
+            this._currentAnimationAction = this._animationMap["walk"];   
+            this._speed = 1;   
             this._maxSpeed = 40;
             this._acceleration = 3;
         } else {
@@ -286,28 +292,77 @@ class Kirby{
             walkDirection.y = 0; //위아래 이동x
             walkDirection.normalize();
             walkDirection.applyAxisAngle(new THREE.Vector3(0,1,0), this._directionOffset()); //누른 방향으로 보정
-            //최대 속도 설정
-            if(this._speed < this._maxSpeed) 
-                this._speed += this._acceleration;
-            else 
-                this._speed -= this._acceleration*2;
+            // // 최대 속도 설정
+            // if(this._speed < this._maxSpeed) 
+            //     this._speed += this._acceleration;
+            // else 
+            //     this._speed -= this._acceleration*2;
             // 방향 속도 합치기
-            const moveX = walkDirection.x * (this._speed * deltaTime);
-            const moveZ = walkDirection.z * (this._speed * deltaTime);
-            //캐릭터 이동
-            this._model.position.x += moveX;
-            this._model.position.z += moveZ; 
-            //카메라 이동
-            this._camera.position.x += moveX;
-            this._camera.position.z += moveZ;
-            //카메라가 바라보는 타겟을 캐릭터로 
-            this._controls.target.set(
-                this._model.position.x,
-                this._model.position.y,
-                this._model.position.z,
-            );         
+            const moveX = walkDirection.x * (this._speed);
+            const moveZ = walkDirection.z * (this._speed);
+
+            let newPosition = new THREE.Vector3();
+            newPosition.set(this._model.position.x + moveX, this._model.position.y, this._model.position.z + moveZ)
+            if(!this.checkCollision(newPosition)){
+                //캐릭터 이동
+                this._model.position.x += moveX;
+                this._model.position.z += moveZ; 
+                //카메라 이동
+                this._camera.position.x += moveX;
+                this._camera.position.z += moveZ;
+                //카메라가 바라보는 타겟을 캐릭터로 
+                this._controls.target.set(
+                    this._model.position.x,
+                    this._model.position.y,
+                    this._model.position.z,
+                );     
+            } else{ //부딪혔을때
+                this.collisionAction()
+            }
         }
+
+        // if(this._model)
+        //     this.checkCollision()
         this._previousTime = time;
+    }
+
+    _collisionFurniture;
+        // 매 프레임마다 충돌 여부 확인
+     checkCollision(newPosition) {
+        // Kirby와 가구 경계 상자 새로 설정 (모델 위치 업데이트 반영)
+        this._kirbyBox = new THREE.Box3().setFromObject(this._model);
+        this._kirbyBox.expandByScalar(-5); // 숫자만큼 모든 방향에서 줄이기
+        this._kirbyBox.translate(newPosition.clone().sub(this._model.position)); // 새로운 위치로 Kirby 박스를 이동
+
+
+        // var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자
+
+        for (const furnitureModel of Furniture.furnitureModelList){
+            const furnitureBox = new THREE.Box3().setFromObject(furnitureModel);
+            var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자
+            this._scene.add(furnitureHelper);
+            // 상자가 겹치는지 확인
+            if (this._kirbyBox.intersectsBox(furnitureBox)) {
+                console.log('Kirby와 가구가 충돌했습니다!');
+                this._collisionFurniture = furnitureModel;
+                return true;
+                // 충돌 시 처리할 로직 추가
+            }
+        }
+        return false;
+    }
+
+    collisionAction(){
+        const name = Furniture.getFurnitureName(this._collisionFurniture);
+        console.log(name);
+        if(name == 'bath'){
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg") 
+        } else if (name == 'bed'){
+            this.changeAnimation("sleep");
+        } else if (name == 'chair'){
+            this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행           
+        } 
     }
 
     render(time) {

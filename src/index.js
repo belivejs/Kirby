@@ -169,7 +169,7 @@ function furnitureUI() {
             const listItem = document.createElement('li');
             listItem.innerHTML = `<a href="#">${furniture}</a>`;
             listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, furniture);
+                const furnitureInstance = new Furniture(scene, furniture, furnitureName);
                 furnitureInstance.add();
             });
             list.appendChild(listItem);
@@ -199,19 +199,19 @@ function initFurniture() {
     for (let i = 0; i < furnitureArray.length; i++) {
         switch (i) {
             case 0:
-                const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:17, y:2.5041244718755564, z:9});
+                const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:17, y:2.5041244718755564, z:9});
                 deskInstance.add(false, 90);
                 break;
             case 1:
-                const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:22, y:12.500000000000012, z:21});
+                const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:22, y:12.500000000000012, z:21});
                 chairInstance.add(false, 180);
                 break;
             case 2:
-                const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:88, y:22.499983113709934, z:16});
+                const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:88, y:22.499983113709934, z:16});
                 bedInstance.add(false, 0);
                 break;
             case 3:
-                const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:32, y:2.500000000000014, z:76});
+                const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:32, y:2.500000000000014, z:76});
                 bathInstance.add(false, 0);
                 break;
             default:
