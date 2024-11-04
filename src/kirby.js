@@ -21,7 +21,7 @@ class Kirby{
     //커비 모델 불러오고 애니메이션 세팅
     _setupModel(path = 'data/kirby_base.glb'){
         new GLTFLoader().load(path, (gltf) => {
-            var scale = 0.2;
+            var scale = 0.15;
             
             //커비 에셋을 scene에 등록
             const model = gltf.scene;
@@ -94,9 +94,11 @@ class Kirby{
                 const size = new THREE.Vector3();
                 box.getSize(size);
                 
-                this._speed = Math.max(size.x, size.y) * 0.1;   
+                this._speed = Math.max(4, size.x, size.y) * 0.1;   
                 this._maxSpeed = 40;
                 this._acceleration = 3;
+
+
             } else {
                 this._currentAnimationAction = null;
                 this._speed = 0;
@@ -120,7 +122,6 @@ class Kirby{
         else if (this._currentAnimationAction == null){
             console.log('current null');
             this._doAction = false;
-
             previousAnimationAction.fadeOut(0.5);
         } 
         else if (this._currentAnimationAction !== previousAnimationAction){
@@ -142,12 +143,12 @@ class Kirby{
      * @param {string} nextAnimation : 바로 연결해 사용할 애니메이션 있다면 적기
      * @param {boolean} clamp 
      */
-    changeAnimation(animationName, loopOption = null, repetitions = null, nextAnimation = null, clamp = false){
+     changeAnimation(animationName, loopOption = null, repetitions = null, nextAnimation = null, clamp = false){
+        return new Promise((resolve)=>{
             var previousAnimationAction = this._currentAnimationAction;
             this._currentAnimationAction = this._animationMap[animationName];
         
-            if(this._currentAnimationAction == null)
-                this._doAction = false;
+
             //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
             if(this._currentAnimationAction && clamp){
                 this._currentAnimationAction.clampWhenFinished = true; 
@@ -169,6 +170,10 @@ class Kirby{
                     this.smoothChange(previousAnimationAction)
                 });
             } 
+            setTimeout(() => {
+            },3000);
+        });
+            
     }
 
     setupAnimations(){
@@ -347,8 +352,10 @@ class Kirby{
                     );     
                 } else{ //부딪혔을때
                     this.collisionAction()
+                    
                 }
             } else {//액션할때 키보드 누르면 가구 벗어날 만큼 움직임
+                
                 const previousAnimationAction = this._currentAnimationAction;
 
                 if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
@@ -404,16 +411,22 @@ class Kirby{
             // 상자가 겹치는지 확인
             if (this._kirbyBox.intersectsBox(furnitureBox)) {
                 console.log('Kirby와 가구가 충돌했습니다!');
+                const preCollision = this._collisionFurniture;
                 this._collisionFurniture = furnitureModel;
+
+                if (Furniture.getFurnitureName(preCollision) == 'chair' && Furniture.getFurnitureName(this._collisionFurniture) == 'desk'){//의자에 앉아있을때 책상 충돌 무시
+                    this._collisionFurniture = preCollision;
+                    return false
+                }else{
                 return true;
-                // 충돌 시 처리할 로직 추가
+                }
             }
         }
         return false;
     }
 
     _doAction=false;
-    collisionAction(){
+    async collisionAction(){
         const name = Furniture.getFurnitureName(this._collisionFurniture);
         console.log(name);
         if(name == 'bath'){
@@ -426,20 +439,24 @@ class Kirby{
             );
         } else if (name == 'bed'){
             this._doAction = true;
-            this.changeAnimation("sleep");
             this._model.position.set(
                 this._collisionFurniture.position.x,
                 this._collisionFurniture.position.y/2,
                 this._collisionFurniture.position.z,
             );
+            await this.changeAnimation("sleep");
+
+
         } else if (name == 'chair'){
             this._doAction = true;     
-            this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행      
             this._model.position.set(
                 this._collisionFurniture.position.x,
                 this._collisionFurniture.position.y/2,
                 this._collisionFurniture.position.z,
             );
+            await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행      
+
+
         } 
     }
 
