@@ -55,6 +55,7 @@ class Kirby{
     _setupControl(){
         this._pressedKeys = {};
         
+        
         //키보드 클릭 이벤트 - 걷기
         document.addEventListener('keydown', (event) => {
             this._pressedKeys[event.key.toLowerCase()] = true;
@@ -69,20 +70,42 @@ class Kirby{
 
     //걷기 애니메이션 처리
     _processAnimation(){
-        const previousAnimationAction = this._currentAnimationAction;
-        if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
-            this._currentAnimationAction = this._animationMap["walk"];   
-            this._speed = 1;   
-            this._maxSpeed = 40;
-            this._acceleration = 3;
-        } else {
-            this._currentAnimationAction = null;
-            this._speed = 0;
-            this._maxSpeed = 0;
-            this._acceleration = 0;
+        if(!this._doAction) { //액션중이 아닐때
+            const previousAnimationAction = this._currentAnimationAction;
+            if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
+                this._currentAnimationAction = this._animationMap["walk"];   
+                this._speed = 1;   
+                this._maxSpeed = 40;
+                this._acceleration = 3;
+            } else {
+                this._currentAnimationAction = null;
+                this._speed = 0;
+                this._maxSpeed = 0;
+                this._acceleration = 0;
+            }
+            
+            this.smoothChange(previousAnimationAction); 
+        } else { //액션중 일 때
+            const previousAnimationAction = this._currentAnimationAction;
+
+            if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
+                this._currentAnimationAction = null;   
+                const box = new THREE.Box3().setFromObject(this._collisionFurniture);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                
+                this._speed = Math.max(size.x, size.y) * 0.1;   
+                this._maxSpeed = 40;
+                this._acceleration = 3;
+            } else {
+                this._currentAnimationAction = null;
+                this._speed = 0;
+                this._maxSpeed = 0;
+                this._acceleration = 0;
+            }
+            this.smoothChange(previousAnimationAction); 
+
         }
-        
-        this.smoothChange(previousAnimationAction);
     }
 
     //부드러운 애니메이션 전환
@@ -96,6 +119,7 @@ class Kirby{
         }
         else if (this._currentAnimationAction == null){
             console.log('current null');
+            this._doAction = false;
 
             previousAnimationAction.fadeOut(0.5);
         } 
@@ -119,30 +143,32 @@ class Kirby{
      * @param {boolean} clamp 
      */
     changeAnimation(animationName, loopOption = null, repetitions = null, nextAnimation = null, clamp = false){
-        var previousAnimationAction = this._currentAnimationAction;
-        this._currentAnimationAction = this._animationMap[animationName];
-    
-        //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
-        if(this._currentAnimationAction && clamp){
-            this._currentAnimationAction.clampWhenFinished = true; 
-        }
+            var previousAnimationAction = this._currentAnimationAction;
+            this._currentAnimationAction = this._animationMap[animationName];
+        
+            if(this._currentAnimationAction == null)
+                this._doAction = false;
+            //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
+            if(this._currentAnimationAction && clamp){
+                this._currentAnimationAction.clampWhenFinished = true; 
+            }
 
-        //애니메이션 반복 옵션
-        if(loopOption)
-            this._currentAnimationAction.setLoop(loopOption, repetitions)
+            //애니메이션 반복 옵션
+            if(loopOption)
+                this._currentAnimationAction.setLoop(loopOption, repetitions)
 
-        //실행
-        this.smoothChange(previousAnimationAction)
+            //실행
+            this.smoothChange(previousAnimationAction)
 
-        //두번째 애니메이션
-        if(nextAnimation){
-            previousAnimationAction = this._currentAnimationAction;
-            this._currentAnimationAction = this._animationMap[nextAnimation];
-            //1번 애니메이션이 끝나면 2번 애니메이션 시작
-            this._currentAnimationAction.getMixer().addEventListener('finished', () => {
-                this.smoothChange(previousAnimationAction)
-            });        
-        }
+            //두번째 애니메이션
+            if(nextAnimation){
+                previousAnimationAction = this._currentAnimationAction;
+                this._currentAnimationAction = this._animationMap[nextAnimation];
+                //1번 애니메이션이 끝나면 2번 애니메이션 시작
+                this._currentAnimationAction.getMixer().addEventListener('finished', () => {
+                    this.smoothChange(previousAnimationAction)
+                });
+            } 
     }
 
     setupAnimations(){
@@ -303,21 +329,54 @@ class Kirby{
 
             let newPosition = new THREE.Vector3();
             newPosition.set(this._model.position.x + moveX, this._model.position.y, this._model.position.z + moveZ)
-            if(!this.checkCollision(newPosition)){
-                //캐릭터 이동
-                this._model.position.x += moveX;
-                this._model.position.z += moveZ; 
-                //카메라 이동
-                this._camera.position.x += moveX;
-                this._camera.position.z += moveZ;
-                //카메라가 바라보는 타겟을 캐릭터로 
-                this._controls.target.set(
-                    this._model.position.x,
-                    this._model.position.y,
-                    this._model.position.z,
-                );     
-            } else{ //부딪혔을때
-                this.collisionAction()
+            console.log('doaction : ', this._doAction);
+            if(!this._doAction){//액션 없을 때
+                if(!this.checkCollision(newPosition)){
+                    //캐릭터 이동
+                    this._model.position.x += moveX;
+                    this._model.position.y = 0;
+                    this._model.position.z += moveZ; 
+                    //카메라 이동
+                    this._camera.position.x += moveX;
+                    this._camera.position.z += moveZ;
+                    //카메라가 바라보는 타겟을 캐릭터로 
+                    this._controls.target.set(
+                        this._model.position.x,
+                        this._model.position.y,
+                        this._model.position.z,
+                    );     
+                } else{ //부딪혔을때
+                    this.collisionAction()
+                }
+            } else {//액션할때 키보드 누르면 가구 벗어날 만큼 움직임
+                const previousAnimationAction = this._currentAnimationAction;
+
+                if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
+                    const box = new THREE.Box3().setFromObject(this._collisionFurniture);
+                    const size = new THREE.Vector3();
+                    box.getSize(size);
+                    console.log("size " ,size)
+
+                    const moveX = walkDirection.x * (this._speed);
+                    const moveZ = walkDirection.z * (this._speed);
+                    
+
+                    //캐릭터 이동
+                    this._model.position.x += moveX;
+                    this._model.position.y = 0;
+                    this._model.position.z += moveZ; 
+                    //카메라 이동
+                    this._camera.position.x += moveX;
+                    this._camera.position.z += moveZ;
+                    //카메라가 바라보는 타겟을 캐릭터로 
+                    this._controls.target.set(
+                        this._model.position.x,
+                        this._model.position.y,
+                        this._model.position.z,
+                    );     
+                } 
+                this.smoothChange(previousAnimationAction); 
+
             }
         }
 
@@ -329,6 +388,7 @@ class Kirby{
     _collisionFurniture;
         // 매 프레임마다 충돌 여부 확인
      checkCollision(newPosition) {
+        
         // Kirby와 가구 경계 상자 새로 설정 (모델 위치 업데이트 반영)
         this._kirbyBox = new THREE.Box3().setFromObject(this._model);
         this._kirbyBox.expandByScalar(-5); // 숫자만큼 모든 방향에서 줄이기
@@ -352,16 +412,34 @@ class Kirby{
         return false;
     }
 
+    _doAction=false;
     collisionAction(){
         const name = Furniture.getFurnitureName(this._collisionFurniture);
         console.log(name);
         if(name == 'bath'){
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg") 
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+            this._model.position.set(
+                this._collisionFurniture.position.x,
+                this._collisionFurniture.position.y/2,
+                this._collisionFurniture.position.z,
+            );
         } else if (name == 'bed'){
+            this._doAction = true;
             this.changeAnimation("sleep");
+            this._model.position.set(
+                this._collisionFurniture.position.x,
+                this._collisionFurniture.position.y/2,
+                this._collisionFurniture.position.z,
+            );
         } else if (name == 'chair'){
-            this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행           
+            this._doAction = true;     
+            this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행      
+            this._model.position.set(
+                this._collisionFurniture.position.x,
+                this._collisionFurniture.position.y/2,
+                this._collisionFurniture.position.z,
+            );
         } 
     }
 
