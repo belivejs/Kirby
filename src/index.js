@@ -7,9 +7,11 @@ import Furniture from './furniture.js';
 var scene, camera, renderer, controls;
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { select } from 'three/webgpu';
 var loader = new GLTFLoader(); // 3D data loader
 
-
+var raycaster;
+var mouse;
 
 function init(){
     // Three.js 씬, 카메라, 렌더러 초기화
@@ -53,35 +55,49 @@ function init(){
 
 // 가구 선택
 function chooseFurniture(){
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
 
     window.addEventListener('click', onMouseClick, false);
 
     function onMouseClick(event) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        if(Furniture.currentFurniture){
+            Furniture.selected(null);
+        } else {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
-        raycaster.setFromCamera(mouse, camera);
+            raycaster.setFromCamera(mouse, camera);
 
-        const intersects = raycaster.intersectObjects(scene.children, true);
+            // // Raycaster 광선 시각화
+            // let arrowHelper;
 
-        let selectedFurniture = null;
+            // const direction = raycaster.ray.direction.clone();
+            // const origin = raycaster.ray.origin.clone();
 
-        if (intersects.length > 0) {
-            selectedFurniture = intersects[0].object;
+            // const arrowLength = 30;
+            // arrowHelper = new THREE.ArrowHelper(direction, origin, arrowLength, 0xff0000);
+            // scene.add(arrowHelper);
 
-            while (selectedFurniture.parent && selectedFurniture.parent.type !== 'Scene') {
-                selectedFurniture = selectedFurniture.parent;
-            }
+            const intersects = raycaster.intersectObjects(scene.children, true);
 
-            if (selectedFurniture.type == 'Mesh') {   
-                selectedFurniture = null;
+            let selectedFurniture = null;
+
+            if (intersects.length > 0) {
+                selectedFurniture = intersects[0].object;
+
+                while (selectedFurniture.parent && selectedFurniture.parent.type !== 'Scene') {
+                    selectedFurniture = selectedFurniture.parent;
+                }
+
+                if (selectedFurniture.type == 'Mesh') {   
+                    selectedFurniture = null;
+                    Furniture.selected(selectedFurniture);
+                    return;
+                }
+
                 Furniture.selected(selectedFurniture);
-                return;
             }
-
-            Furniture.selected(selectedFurniture);
         }
         console.log(Furniture.currentFurniture);
     }
@@ -91,19 +107,23 @@ function chooseFurniture(){
     // 배치
     window.addEventListener('mousemove', (event) => {
 
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        if(Furniture.currentFurniture){
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        raycaster.setFromCamera(mouse, camera);
-        
-        const intersects = raycaster.intersectObjects(scene.children, true);
+            raycaster.setFromCamera(mouse, camera);
+            
+            const intersects = raycaster.intersectObjects(scene.children, true);
 
-        if (intersects.length > 0) {
-            intersectedObject = intersects[0].object;
-            const intersectPoint = intersects[0].point;
+            if (intersects.length > 0) {
+                intersectedObject = intersects[0].object;
+                const intersectPoint = intersects[0].point;
 
-            if (Furniture.currentFurniture) {
-                Furniture.currentFurniture.position.set(Math.floor(intersectPoint.x / 10) * 10, Math.floor(intersectPoint.y / 10) * 10, Math.floor(intersectPoint.z / 10) * 10);
+                if (Furniture.currentFurniture) {
+                    // Furniture.currentFurniture.model.position.set(Math.floor(intersectPoint.x / 10) * 10, Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z / 10) * 10);
+                    Furniture.currentFurniture.model.position.set(Math.floor(intersectPoint.x), Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z));
+                    console.log(`현재 좌표: x:${Furniture.currentFurniture.model.position.x}, y:${Furniture.currentFurniture.model.position.y}, z:${Furniture.currentFurniture.model.position.z}`);
+                }
             }
         }
     });
@@ -149,7 +169,7 @@ function furnitureUI() {
             const listItem = document.createElement('li');
             listItem.innerHTML = `<a href="#">${furniture}</a>`;
             listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, furniture, furnitureName);
+                const furnitureInstance = new Furniture(scene, furniture);
                 furnitureInstance.add();
             });
             list.appendChild(listItem);
@@ -158,14 +178,50 @@ function furnitureUI() {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'e' || e.key === 'ㄷ') {
-        Furniture.rotate(45);
-    } else if (e.key === 'r' || e.key === 'ㄱ') {
-        Furniture.rotate(-45);
+    if (Furniture.currentFurniture) {
+        if (e.key === 'e' || e.key === 'ㄷ') {
+            Furniture.currentFurniture.rotate(45);
+        } else if (e.key === 'r' || e.key === 'ㄱ') {
+            Furniture.currentFurniture.rotate(-45);
+        }
     }
 });
 
-function animate(time) {
+
+function initFurniture() {
+    const furnitureArray = [
+        'models/essential/desk/desk2/scene.gltf',
+        'models/essential/chair/chair1/scene.gltf',
+        'models/essential/bed/bed1/scene.gltf',
+        'models/essential/bath/bath1/scene.gltf',
+    ];
+
+    for (let i = 0; i < furnitureArray.length; i++) {
+        switch (i) {
+            case 0:
+                const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:17, y:2.5041244718755564, z:9});
+                deskInstance.add(false, 90);
+                break;
+            case 1:
+                const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:22, y:12.500000000000012, z:21});
+                chairInstance.add(false, 180);
+                break;
+            case 2:
+                const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:88, y:22.499983113709934, z:16});
+                bedInstance.add(false, 0);
+                break;
+            case 3:
+                const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:32, y:2.500000000000014, z:76});
+                bathInstance.add(false, 0);
+                break;
+            default:
+                console.error('알 수 없는 가구 인덱스입니다.');
+        }
+    }
+}
+
+// 애니메이션 루프
+function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
@@ -219,4 +275,5 @@ function setColor(objectScene, color){
 init();
 furnitureUI();
 chooseFurniture();
+initFurniture();
 animate();

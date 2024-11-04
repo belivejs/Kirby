@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
 class House {
+
+    static groundHeight;
+
     constructor(scene, length) {
         this.scene = scene;
         this.length = length;
@@ -16,6 +19,9 @@ class House {
         const floor = new THREE.Mesh(floorGeometry, floorMaterial);
         floor.position.set(this.length / 2, 0, this.length / 2);
         floor.rotation.x = -Math.PI / 2;
+
+        const groundBox = new THREE.Box3().setFromObject(floor);
+        House.groundHeight = groundBox.max.y;
 
         // 벽
         const left_wallMaterial = new THREE.MeshStandardMaterial({ color: this.leftWallColor });
