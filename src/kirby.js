@@ -383,8 +383,8 @@ class Kirby{
 
         for (const furnitureModel of Furniture.furnitureModelList){
             const furnitureBox = new THREE.Box3().setFromObject(furnitureModel);
-            var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자
-            this._scene.add(furnitureHelper);
+            // var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자
+            // this._scene.add(furnitureHelper);
             // 상자가 겹치는지 확인
             if (this._kirbyBox.intersectsBox(furnitureBox)) {
                 console.log('Kirby와 가구가 충돌했습니다!', Furniture.getFurnitureName(furnitureModel));
