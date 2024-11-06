@@ -74,45 +74,20 @@ class Kirby{
 
     //걷기 애니메이션 처리
     _processAnimation(){
-        if(!this._doAction) { //액션중이 아닐때
-            const previousAnimationAction = this._currentAnimationAction;
-            if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
-                this._currentAnimationAction = this._animationMap["walk"];   
-                this._speed = 1;   
-                this._maxSpeed = 40;
-                this._acceleration = 3;
-            } else {
-                this._currentAnimationAction = null;
-                this._speed = 0;
-                this._maxSpeed = 0;
-                this._acceleration = 0;
-            }
-            
-            this.smoothChange(previousAnimationAction); 
-        } else { //액션중 일 때
-            const previousAnimationAction = this._currentAnimationAction;
-
-            if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
-                this._currentAnimationAction = null;   
-                const box = new THREE.Box3().setFromObject(this._collisionFurniture);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-                console.log('s',size)
-                
-                this._speed = Math.max(6, size.x, size.y)*0.9;
-                this._maxSpeed = 40;
-                this._acceleration = 3;
-
-
-            } else {
-                this._currentAnimationAction = null;
-                this._speed = 0;
-                this._maxSpeed = 0;
-                this._acceleration = 0;
-            }
-            this.smoothChange(previousAnimationAction); 
-
+        const previousAnimationAction = this._currentAnimationAction;
+        if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
+            this._currentAnimationAction = this._animationMap["walk"];   
+            this._speed = 1;   
+            this._maxSpeed = 40;
+            this._acceleration = 3;
+        } else {
+            this._currentAnimationAction = null;
+            this._speed = 0;
+            this._maxSpeed = 0;
+            this._acceleration = 0;
         }
+        
+        this.smoothChange(previousAnimationAction); 
     }
 
     //부드러운 애니메이션 전환
