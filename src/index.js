@@ -193,7 +193,7 @@ function initFurniture() {
         'models/essential/desk/desk2/scene.gltf',
         'models/essential/chair/chair1/scene.gltf',
         'models/essential/bed/bed1/scene.gltf',
-        'models/essential/bath/bath1/scene.gltf',
+        'models/essential/bath/bath2/scene.gltf',
     ];
 
     for (let i = 0; i < furnitureArray.length; i++) {
