@@ -57,16 +57,20 @@ class Kirby{
         
         
         //키보드 클릭 이벤트 - 걷기
-        document.addEventListener('keydown', (event) => {
-            this._pressedKeys[event.key.toLowerCase()] = true;
-            this._processAnimation();
-        });
+        document.addEventListener('keydown', this.keydownEvent);
         //키보드 뗄때 이벤트 - 멈추기
-        document.addEventListener('keyup', (event) => {
-            this._pressedKeys[event.key.toLowerCase()] = false;
-            this._processAnimation();
-        });
+        document.addEventListener('keyup', this.keyupEvent);
     }
+
+    keydownEvent = (e) => {
+        this._pressedKeys[e.key.toLowerCase()] = true;
+        this._processAnimation();
+    };
+    keyupEvent = (e) => {
+        this._pressedKeys[e.key.toLowerCase()] = false;
+        this._processAnimation();
+    };
+
 
     //걷기 애니메이션 처리
     _processAnimation(){
@@ -93,8 +97,9 @@ class Kirby{
                 const box = new THREE.Box3().setFromObject(this._collisionFurniture);
                 const size = new THREE.Vector3();
                 box.getSize(size);
+                console.log('s',size)
                 
-                this._speed = Math.max(4, size.x, size.y) * 0.1;   
+                this._speed = Math.max(6, size.x, size.y)*0.9;
                 this._maxSpeed = 40;
                 this._acceleration = 3;
 
@@ -171,9 +176,9 @@ class Kirby{
                 });
             } 
             setTimeout(() => {
+                resolve();
             },3000);
         });
-            
     }
 
     setupAnimations(){
@@ -354,36 +359,6 @@ class Kirby{
                     this.collisionAction()
                     
                 }
-            } else {//액션할때 키보드 누르면 가구 벗어날 만큼 움직임
-                
-                const previousAnimationAction = this._currentAnimationAction;
-
-                if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
-                    const box = new THREE.Box3().setFromObject(this._collisionFurniture);
-                    const size = new THREE.Vector3();
-                    box.getSize(size);
-                    console.log("size " ,size)
-
-                    const moveX = walkDirection.x * (this._speed);
-                    const moveZ = walkDirection.z * (this._speed);
-                    
-
-                    //캐릭터 이동
-                    this._model.position.x += moveX;
-                    this._model.position.y = 0;
-                    this._model.position.z += moveZ; 
-                    //카메라 이동
-                    this._camera.position.x += moveX;
-                    this._camera.position.z += moveZ;
-                    //카메라가 바라보는 타겟을 캐릭터로 
-                    this._controls.target.set(
-                        this._model.position.x,
-                        this._model.position.y,
-                        this._model.position.z,
-                    );     
-                } 
-                this.smoothChange(previousAnimationAction); 
-
             }
         }
 
@@ -395,14 +370,10 @@ class Kirby{
     _collisionFurniture;
         // 매 프레임마다 충돌 여부 확인
      checkCollision(newPosition) {
-        
         // Kirby와 가구 경계 상자 새로 설정 (모델 위치 업데이트 반영)
         this._kirbyBox = new THREE.Box3().setFromObject(this._model);
         this._kirbyBox.expandByScalar(-5); // 숫자만큼 모든 방향에서 줄이기
         this._kirbyBox.translate(newPosition.clone().sub(this._model.position)); // 새로운 위치로 Kirby 박스를 이동
-
-
-        // var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자
 
         for (const furnitureModel of Furniture.furnitureModelList){
             const furnitureBox = new THREE.Box3().setFromObject(furnitureModel);
@@ -427,16 +398,23 @@ class Kirby{
 
     _doAction=false;
     async collisionAction(){
+        this._speed = 0;
+        document.removeEventListener('keydown', this.keydownEvent);
+        document.removeEventListener('keyup', this.keyupEvent);
+        this._pressedKeys = {}
+
         const name = Furniture.getFurnitureName(this._collisionFurniture);
-        console.log(name);
+        console.log(this._collisionFurniture.position);
         if(name == 'bath'){
-            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+            
             this._model.position.set(
                 this._collisionFurniture.position.x,
-                this._collisionFurniture.position.y/2,
+                this._collisionFurniture.position.y,
                 this._collisionFurniture.position.z,
             );
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+
         } else if (name == 'bed'){
             this._doAction = true;
             this._model.position.set(
@@ -445,19 +423,46 @@ class Kirby{
                 this._collisionFurniture.position.z,
             );
             await this.changeAnimation("sleep");
-
+            this.moveKirby()
+            this.changeAnimation(null);
 
         } else if (name == 'chair'){
             this._doAction = true;     
             this._model.position.set(
                 this._collisionFurniture.position.x,
-                this._collisionFurniture.position.y/2,
+                this._collisionFurniture.position.y/1.5,
                 this._collisionFurniture.position.z,
             );
-            await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true); //애니메이션 한 번만 실행      
-
-
+            await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true);
+            this.moveKirby()
+            this.changeAnimation(null);
         } 
+        //키보드 이벤트 다시 세팅
+        document.addEventListener('keydown', this.keydownEvent);
+        document.addEventListener('keyup', this.keyupEvent);
+    }
+
+    moveKirby(){
+        const box = new THREE.Box3().setFromObject(this._collisionFurniture);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+
+        const moveX = size.x
+        const moveZ = 0
+        
+        //캐릭터 이동
+        this._model.position.x += moveX;
+        this._model.position.y = 0;
+        this._model.position.z += moveZ; 
+        //카메라 이동
+        this._camera.position.x += moveX;
+        this._camera.position.z += moveZ;
+        //카메라가 바라보는 타겟을 캐릭터로 
+        this._controls.target.set(
+            this._model.position.x,
+            this._model.position.y,
+            this._model.position.z,
+        );     
     }
 
     render(time) {
