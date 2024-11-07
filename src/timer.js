@@ -100,8 +100,8 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
     let rotationSpeed = (2 * Math.PI) / ticks; // 하루를 ticks만큼에 한 바퀴 회전
     let startTime = Date.now();
 
-    const dayColor = new THREE.Color(0x0699FB); // 하얀색 (낮)
-    const nightColor = new THREE.Color(0x000000); // 검은색 (밤)
+    const dayColor = new THREE.Color(0x50bcdf);
+    const nightColor = new THREE.Color(0x212121); // 검은색 (밤)
     let currentBackgroundColor = dayColor.clone();
 
     function updatePositions() {
@@ -113,7 +113,7 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
         const currentTime = Date.now();
         const elapsedTime = currentTime - startTime;
 
-        const radius = 100; // 회전 반경
+        const radius = 50; // 회전 반경
         const time = (Date.now() - startTime) * 0.001; // 경과 시간을 사용하여 시간 계산
 
         // 태양 회전 위치 업데이트 (y축을 z축으로 변환, z축을 y축으로 변환)
@@ -130,7 +130,7 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
         
 
         const sunVisibility = Math.max(0, Math.cos(time * rotationSpeed + Math.PI + Math.PI / 2));
-        sunLight.intensity = sunVisibility * sunLight.intensity;
+        // sunLight.intensity = sunVisibility * sunLight.intensity;
 
         // 달 회전 위치 업데이트 (고정된 높이, 반대 방향 회전)
         moonMesh.position.x = target.position.x + radius * Math.cos(time * rotationSpeed + Math.PI + Math.PI / 2);
@@ -144,11 +144,12 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
         moonMesh.visible = (moonMesh.position.y > 0);
         moonLight.visible = moonMesh.visible;
         const moonVisibility = Math.max(0, Math.cos(time * rotationSpeed + Math.PI + Math.PI / 2));
-        moonLight.intensity = moonVisibility * moonLight.intensity;
+        // moonLight.intensity = moonVisibility * moonLight.intensity;
         
         // 태양의 고도에 따라 배경색 변화 (낮: 하얀색, 밤: 검은색으로 보간)
-        const dayNightRatio = (1 + Math.cos(time * rotationSpeed)) / 2; // 0에서 1 사이로 주기적으로 변화
-        currentBackgroundColor.lerpColors(nightColor, dayColor, dayNightRatio * 0.05); // 천천히 밤에서 낮으로 색상 보간
+        const dayNightRatio = (1 - Math.cos(time * rotationSpeed)) / 2; // 0에서 1 사이로 주기적으로 변화
+        currentBackgroundColor.lerpColors(dayColor, nightColor, dayNightRatio)
+        // currentBackgroundColor.lerpColors(nightColor, dayColor, dayNightRatio * 0.05); // 천천히 밤에서 낮으로 색상 보간
         scene.background = currentBackgroundColor;
 
         // // 태양과 달의 빛의 세기를 낮과 밤에 맞춰 서서히 전환 (낮에는 태양 빛이 점점 켜지고, 밤에는 달빛이 점점 켜짐)

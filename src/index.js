@@ -30,7 +30,7 @@ function init(){
         texture.mapping = THREE.EquirectangularReflectionMapping;
 
         // 씬의 환경 설정
-        scene.environment = texture;
+        // scene.environment = texture;
         scene.background = texture;
     });
 
@@ -53,7 +53,8 @@ function init(){
 
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
-    const sunLight = new THREE.DirectionalLight(sunColor, 0.5); // 빨간빛, 강도 3
+    // const sunLight = new THREE.DirectionalLight(sunColor, 10); // 빨간빛, 강도 3
+    const sunLight = new THREE.PointLight(sunColor, 3000)
     sunLight.castShadow = true;
     scene.add(sunLight);
 
@@ -65,8 +66,8 @@ function init(){
 
     // 달 light source 추가
     // const moonColor = 0xbfc1c2;
-    const moonColor = 0x000100;
-    const moonLight = new THREE.PointLight(moonColor, 0.5, 100) // 회색빛, 강도 0.5
+    const moonColor = 0xbfc1c2;
+    const moonLight = new THREE.PointLight(moonColor, 3000) // 회색빛, 강도 0.5
     moonLight.castShadow = true;
     scene.add(moonLight);
 
