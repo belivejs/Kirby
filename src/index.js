@@ -13,45 +13,55 @@ var loader = new GLTFLoader(); // 3D data loader
 var raycaster;
 var mouse;
 
+
 function init(){
-    // Three.js 씬, 카메라, 렌더러 초기화
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
+        75, // 시야각
+        window.innerWidth / window.innerHeight, // 화면 비율
+        0.1, // 가까운 절단면
+        1000 // 먼 절단면
     );
 
-    
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x87CEEB);
     document.body.appendChild(renderer.domElement);
 
     camera.position.set(70, 60, 100);
     camera.lookAt(0, 0, 0);
 
-    // OrbitControls 설정
+    // OrbitControls 추가
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    // 조명 추가
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
+    // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 세기 조절 (0.5)
+    scene.add(ambientLight);
+    const light = new THREE.DirectionalLight(0xffffff, 2);
+    light.position.set(50, 50, 50);
+    // PointLight 생성 (흰색 빛, 강도 1, 거리 100)
+    const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
+
+    // 빛의 위치 설정 (예: x=10, y=10, z=10)
+    pointLight.position.set(170, 200, 100);
+
+    // 씬에 추가
+    scene.add(pointLight);
+
+    const pointLightHelper = new THREE.PointLightHelper(pointLight, 5); // 두 번째 매개변수는 크기
+    scene.add(pointLightHelper);
     scene.add(light);
-
-    // 집 생성
-    const house = new House(scene, 100);
+    // 집
+    const house = new House(scene, 300, 250);
     house.init();
-  
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-    new Kirby(scene, renderer, camera, controls);
+    new Kirby(scene, renderer, camera, controls);    
 
     requestAnimationFrame(animate);
-    
+
 }
 
 // 가구 선택
@@ -144,32 +154,33 @@ function furnitureUI() {
 
     document.addEventListener('DOMContentLoaded', function() {
         const furnitureArray = [
-            'models/essential/desk/desk1/scene.gltf',
-            'models/essential/desk/desk2/scene.gltf',
-            'models/essential/desk/desk3/scene.gltf',
-            'models/essential/desk/desk4/scene.gltf',
-            'models/essential/chair/chair1/scene.gltf',
-            'models/essential/chair/chair2/scene.gltf',
-            'models/essential/chair/chair3/scene.gltf',
-            'models/essential/chair/chair4/scene.gltf',
-            'models/essential/bed/bed1/scene.gltf',
-            'models/essential/bed/bed2/scene.gltf',
-            'models/essential/bed/bed3/scene.gltf',
-            'models/essential/bed/bed4/scene.gltf',
-            'models/essential/bath/bath1/scene.gltf',
-            'models/essential/bath/bath2/scene.gltf',
-            'models/essential/bath/bath3/scene.gltf',
-            'models/essential/bath/bath4/scene.gltf',
+            './models/essential/desk/desk1/scene.gltf',
+            './models/essential/desk/desk2/scene.gltf',
+            './models/essential/desk/desk3/scene.gltf',
+            './models/essential/desk/desk4/scene.gltf',
+            './models/essential/chair/chair1/scene.gltf',
+            './models/essential/chair/chair2/scene.gltf',
+            './models/essential/chair/chair3/scene.gltf',
+            './models/essential/chair/chair4/scene.gltf',
+            './models/essential/bed/bed1/scene.gltf',
+            './models/essential/bed/bed2/scene.gltf',
+            './models/essential/bed/bed3/scene.gltf',
+            './models/essential/bed/bed4/scene.gltf',
+            './models/essential/bath/bath1/scene.gltf',
+            './models/essential/bath/bath2/scene.gltf',
+            './models/essential/bath/bath3/scene.gltf',
+            './models/essential/bath/bath4/scene.gltf',
         ];
 
         const list = document.getElementById('furniture-list');
         list.innerHTML = '';
 
         furnitureArray.forEach(furniture => {
+            const furnitureName = furniture.split('/')[2]
             const listItem = document.createElement('li');
             listItem.innerHTML = `<a href="#">${furniture}</a>`;
             listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, furniture, furniture);
+                const furnitureInstance = new Furniture(scene, furniture, furnitureName);
                 furnitureInstance.add();
             });
             list.appendChild(listItem);
@@ -188,36 +199,93 @@ document.addEventListener('keydown', (e) => {
 });
 
 
+// function initFurniture() {
+//     const furnitureArray = [
+//         './models/essential/desk/desk2/scene.gltf',
+//         './models/essential/chair/chair1/scene.gltf',
+//         './models/essential/bed/bed1/scene.gltf',
+//         './models/essential/bath/bath2/scene.gltf',
+//     ];
+
+//     for (let i = 0; i < furnitureArray.length; i++) {
+//         try{
+//             console.log("가구 넣음");
+//             scene.add(furnitureArray[i]);
+
+//             switch (i) {
+//                 case 0:
+//                     const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:17, y:2.5041244718755564, z:9});
+//                     deskInstance.add(false, 90);
+//                     break;
+//                 case 1:
+//                     const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:22, y:12.500000000000012, z:21});
+//                     chairInstance.add(false, 180);
+//                     break;
+//                 case 2:
+//                     const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:88, y:22.499983113709934, z:16});
+//                     bedInstance.add(false, 0);
+//                     break;
+//                 case 3:
+//                     const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:32, y:2.500000000000014, z:76});
+//                     bathInstance.add(false, 0);
+//                     break;
+//                 default:
+//                     console.error('알 수 없는 가구 인덱스입니다.');
+//             }
+//         }catch(e){
+//             console.log(e)
+//         }
+        
+//     }
+
+// }
 function initFurniture() {
     const furnitureArray = [
-        'models/essential/desk/desk2/scene.gltf',
-        'models/essential/chair/chair1/scene.gltf',
-        'models/essential/bed/bed1/scene.gltf',
-        'models/essential/bath/bath1/scene.gltf',
+        './models/essential/desk/desk2/scene.gltf',
+        './models/essential/chair/chair1/scene.gltf',
+        './models/essential/bed/bed1/scene.gltf',
+        './models/essential/bath/bath2/scene.gltf',
     ];
 
-    for (let i = 0; i < furnitureArray.length; i++) {
-        switch (i) {
-            case 0:
-                const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:17, y:2.5041244718755564, z:9});
-                deskInstance.add(false, 90);
-                break;
-            case 1:
-                const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:22, y:12.500000000000012, z:21});
-                chairInstance.add(false, 180);
-                break;
-            case 2:
-                const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:88, y:22.499983113709934, z:16});
-                bedInstance.add(false, 0);
-                break;
-            case 3:
-                const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i], {x:32, y:2.500000000000014, z:76});
-                bathInstance.add(false, 0);
-                break;
-            default:
-                console.error('알 수 없는 가구 인덱스입니다.');
-        }
-    }
+    const loader = new GLTFLoader();
+
+    furnitureArray.forEach((url, i) => {
+        loader.load(
+            url,
+            (gltf) => {
+                console.log("가구 넣음");
+                
+                // 모델을 씬에 추가
+                scene.add(gltf.scene);
+
+                // 위치 및 회전 설정
+                switch (i) {
+                    case 0:
+                        const deskInstance = new Furniture(scene, url, 'desk', {x:17, y:2.5041244718755564, z:9});
+                        deskInstance.add(false, 90);
+                        break;
+                    case 1:
+                        const chairInstance = new Furniture(scene, url, 'chair', {x:22, y:12.500000000000012, z:21});
+                        chairInstance.add(false, 180);
+                        break;
+                    case 2:
+                        const bedInstance = new Furniture(scene, url, 'bed', {x:88, y:22.499983113709934, z:16});
+                        bedInstance.add(false, 0);
+                        break;
+                    case 3:
+                        const bathInstance = new Furniture(scene, url, 'bath', {x:32, y:2.500000000000014, z:76});
+                        bathInstance.add(false, 0);
+                        break;
+                    default:
+                        console.error('알 수 없는 가구 인덱스입니다.');
+                }
+            },
+            undefined,
+            (error) => {
+                console.error(`Failed to load ${url}:`, error);
+            }
+        );
+    });
 }
 
 // 애니메이션 루프
@@ -271,8 +339,8 @@ function setColor(objectScene, color){
 
 }
 
-furnitureUI();
 init();
+furnitureUI();
 chooseFurniture();
 initFurniture();
 animate();

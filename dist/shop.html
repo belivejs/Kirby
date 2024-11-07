@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* 화면 전체 높이 */
+            margin: 0;
+            background-color: #f0f0f0; /* 배경 색상 설정 */
+            position: relative; /* 위치 설정 */
+        }
+
+        /* 현재 가진 돈 표시 */
+        #moneyDisplay {
+            position: absolute;
+            bottom: 10px; /* 화면의 아래쪽에 위치 */
+            left: 10px; /* 화면의 왼쪽에 위치 */
+            font-size: 18px;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+        }
+
+        /* 버튼 스타일 */
+        #backButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50; /* 버튼 색상 */
+            color: white;
+            border: none;
+            border-radius: 5px; /* 모서리를 둥글게 */
+            cursor: pointer;
+            margin-top: 20px; /* 버튼 위쪽 여백 */
+        }
+
+        .table {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 4열 */
+            grid-template-rows: repeat(4, 1fr); /* 2행 */
+            gap: 10px; /* 셀 간격 */
+            width: 80%; /* 테이블 너비 */
+            margin-top: 20px; /* 테이블 위쪽 여백 */
+        }
+
+        .cell {
+            background-color: #f0f0f0; /* 셀 배경색 */
+            border: 1px solid #ccc; /* 셀 경계 */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 내용 세로 가운데 정렬 */
+            justify-content: center; /* 내용 가로 가운데 정렬 */
+            height: 100px; /* 셀 높이 */
+            font-size: 16px; /* 글자 크기 */
+        }
+
+        /* 구매 버튼 스타일 */
+        .buyButton {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 현재 가진 돈 표시 -->
+    <div id="moneyDisplay">현재 가진 돈: 10000원</div>
+
+    <!-- 상품 테이블 -->
+    <div class="table">
+        <div class="cell">침대 <br>\2000<button class="buyButton" onclick="buyItem(2000)">Buy</button></div>
+        <div class="cell">소파 <br>\1500 <button class="buyButton" onclick="buyItem(1500)">Buy</button></div>
+        <div class="cell">책상 <br>\1000<button class="buyButton" onclick="buyItem(1000)">Buy</button></div>
+        <div class="cell">컴퓨터 <br>\2000<button class="buyButton" onclick="buyItem(2000)">Buy</button></div>
+        <div class="cell">화분 <br>\300<button class="buyButton" onclick="buyItem(300)">Buy</button></div>
+        <div class="cell">옷장 <br>\1200<button class="buyButton" onclick="buyItem(1200)">Buy</button></div>
+        <div class="cell">옷걸이 <br>\100<button class="buyButton" onclick="buyItem(100)">Buy</button></div>
+        <div class="cell">책장 <br>\800<button class="buyButton" onclick="buyItem(800)">Buy</button></div>
+    </div>
+
+    <!-- 돌아가기 버튼 -->
+    <button id="backButton" onclick="goBack()">Go home</button>
+
+    <script>
+        let money = 10000; // 초기 돈 설정
+
+        // 구매하기 함수
+        function buyItem(cost) {
+            if (money >= cost) {
+                money -= cost; // 돈 차감
+                document.getElementById('moneyDisplay').textContent = `현재 가진 돈: ${money}원`;
+                alert(`구매 완료! ${cost}원이 차감되었습니다.`);
+            } else {
+                alert("잔액이 부족합니다.");
+            }
+        }
+
+        // 돌아가기 함수
+        function goBack() {
+            window.location.href = 'index.html'; // index.html로 이동
+        }
+    </script>
+</body>
+</html>

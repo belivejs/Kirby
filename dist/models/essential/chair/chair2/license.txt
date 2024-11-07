@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dublin Chair
+* source:	https://sketchfab.com/3d-models/dublin-chair-763c5061112d4432addd898b5f4a17ae
+* author:	Aliosa (https://sketchfab.com/aliosa123)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dublin Chair" (https://sketchfab.com/3d-models/dublin-chair-763c5061112d4432addd898b5f4a17ae) by Aliosa (https://sketchfab.com/aliosa123) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -5,12 +5,14 @@ import House from './house.js';
 class Furniture {
     static currentFurniture = null;
     static furnitureList = [];
+    static furnitureModelList =[];
 
     constructor(scene, path, furnitureName, position = { x: 25, y: 0, z: 25 }) {
         this.scene = scene;
         this.path = path;
         this.furnitureName = furnitureName;
         this.model = null;
+        this.object3D = null;
         this.position = position;
         this.scale = { x: 1, y: 1, z: 1 };
     }
@@ -36,14 +38,17 @@ class Furniture {
             this.model.position.y += House.groundHeight - modelBottomY;
 
             Furniture.furnitureList.push(this);
+            Furniture.furnitureModelList.push(this.model);
 
             if(ifSelect){
                 Furniture.currentFurniture = this;
             }
-
+            console.log("rotate전까지");
             this.rotate(rotate);
 
+            console.log("add전까지");
             this.scene.add(this.model);
+            console.log("모델 : ", this.model);
         });
     }
 
