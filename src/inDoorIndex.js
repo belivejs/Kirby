@@ -8,11 +8,17 @@ var scene, camera, renderer, controls;
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { select } from 'three/webgpu';
+
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import {initializeTimer} from './timer.js';
 var loader = new GLTFLoader(); // 3D data loader
 
 var raycaster;
 var mouse;
 
+let updatePositions; // 회전 로직을 저장하는 변수
+let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
+let sunMesh, moonMesh;
 
 function init(){
     scene = new THREE.Scene();
@@ -22,6 +28,17 @@ function init(){
         0.1, // 가까운 절단면
         1000 // 먼 절단면
     );
+
+    // HDR 로더 설정
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load('./data/drakensberg_solitary_mountain_puresky_1k.hdr', function (texture) {
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+
+        // 씬의 환경 설정
+        // scene.environment = texture;
+        scene.background = texture;
+    });
+
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -37,23 +54,54 @@ function init(){
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 세기 조절 (0.5)
-    scene.add(ambientLight);
-    const light = new THREE.DirectionalLight(0xffffff, 2);
-    light.position.set(50, 50, 50);
-    // PointLight 생성 (흰색 빛, 강도 1, 거리 100)
-    const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
 
-    // 빛의 위치 설정 (예: x=10, y=10, z=10)
-    pointLight.position.set(170, 200, 100);
+    // 태양 light source 추가
+    const sunColor = 0xfff5e1;
+    const sunLight = new THREE.PointLight(sunColor, 1000000)
+    sunLight.castShadow = true;
+    scene.add(sunLight);
 
-    // 씬에 추가
-    scene.add(pointLight);
+    // 태양을 표현하기 위한 구체 추가
+    const sunGeometry = new THREE.SphereGeometry(1, 32, 32); // 태양 크기
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: sunColor });
+    sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+    scene.add(sunMesh); // 씬에 추가
 
-    const pointLightHelper = new THREE.PointLightHelper(pointLight, 5); // 두 번째 매개변수는 크기
-    scene.add(pointLightHelper);
-    scene.add(light);
+    // 달 light source 추가
+    // const moonColor = 0xbfc1c2;
+    const moonColor = 0xbfc1c2;
+    const moonLight = new THREE.PointLight(moonColor, 1000000)
+    moonLight.castShadow = true;
+    scene.add(moonLight);
+
+    // 달을 표현하기 위한 구체 추가
+    const moonGeometry = new THREE.SphereGeometry(1, 32, 32); // 달 크기
+    const moonMaterial = new THREE.MeshBasicMaterial({ color: moonColor });
+    moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+    scene.add(moonMesh); // 씬에 추가
+
+    // timer.js의 initializeTimer 함수로 회전 로직을 생성
+    updatePositions = initializeTimer(gameTicks, sunLight, moonLight, sunMesh, moonMesh, scene, scene);
+    
+
+    
+    // // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
+    // const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 세기 조절 (0.5)
+    // scene.add(ambientLight);
+    // const light = new THREE.DirectionalLight(0xffffff, 2);
+    // light.position.set(50, 50, 50);
+    // // PointLight 생성 (흰색 빛, 강도 1, 거리 100)
+    // const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
+
+    // // 빛의 위치 설정 (예: x=10, y=10, z=10)
+    // pointLight.position.set(170, 200, 100);
+
+    // // 씬에 추가
+    // scene.add(pointLight);
+
+    // const pointLightHelper = new THREE.PointLightHelper(pointLight, 5); // 두 번째 매개변수는 크기
+    // scene.add(pointLightHelper);
+    // scene.add(light);
     // 집
     const house = new House(scene, 300, 250);
     house.init();
@@ -292,6 +340,11 @@ function initFurniture() {
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+
+    if (updatePositions) {
+        updatePositions(); // 태양과 달의 위치를 업데이트
+    }
+
     renderer.render(scene, camera);
 }
 
