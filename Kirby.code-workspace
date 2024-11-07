@@ -3,12 +3,7 @@
         {
             "path": "."
         },
-        {
-            "path": "../../Homework"
-        },
-        {
-            "path": "../../Practice"
-        }
+
     ],
     "settings": {
         "liveServer.settings.multiRootWorkspaceName": "Homework"
