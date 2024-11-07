@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    indoor : './src/index.js', // 시작 파일
+    indoor : './src/inDoorIndex.js', // 시작 파일
     outdoor: './src/outDoorIndex.js'
   },
   output: {
