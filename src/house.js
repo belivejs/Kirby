@@ -10,10 +10,10 @@ class House {
         const floorGeometry = new THREE.BoxGeometry(this.width, this.length, 5);
         const floorLoader = new THREE.TextureLoader();
         // 벽
-        const floorBaseColor = floorLoader.load('/texture/textures/laminate_floor_02_diff_4k.jpg');
-        const floorNormalMap = floorLoader.load('/texture/textures/laminate_floor_02_nor_gl_4k.jpg');
-        const floorHeightMap = floorLoader.load('/texture/textures/laminate_floor_02_disp_4k.png');
-        const floorRoughnessMap = floorLoader.load('/texture/textures/laminate_floor_02_rough_4k.jpg');
+        const floorBaseColor = floorLoader.load('/texture/Laminate_floor/laminate_floor_02_diff_4k.jpg');
+        const floorNormalMap = floorLoader.load('/texture/Laminate_floor/laminate_floor_02_nor_gl_4k.jpg');
+        const floorHeightMap = floorLoader.load('/texture/Laminate_floor/laminate_floor_02_disp_4k.png');
+        const floorRoughnessMap = floorLoader.load('/texture/Laminate_floor/laminate_floor_02_rough_4k.jpg');
 
         const floorMaterial = new THREE.MeshStandardMaterial({ 
             map : floorBaseColor,
