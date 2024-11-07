@@ -12,7 +12,7 @@ var controls;
 var loader = new GLTFLoader(); // 3D data loader
 let kirby;
 let updatePositions; // 회전 로직을 저장하는 변수
-let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
+let gameTicks = 3; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 
 function init(){
@@ -53,27 +53,26 @@ function init(){
 
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
-    // const sunLight = new THREE.DirectionalLight(sunColor, 10); // 빨간빛, 강도 3
     const sunLight = new THREE.PointLight(sunColor, 3000)
     sunLight.castShadow = true;
     scene.add(sunLight);
 
     // 태양을 표현하기 위한 구체 추가
-    const sunGeometry = new THREE.SphereGeometry(1, 32, 32); // 반지름 1, 세부 사항 32
-    const sunMaterial = new THREE.MeshBasicMaterial({ color: sunColor }); // 빨간색
+    const sunGeometry = new THREE.SphereGeometry(1, 32, 32); // 태양 크기
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: sunColor });
     sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sunMesh); // 씬에 추가
 
     // 달 light source 추가
     // const moonColor = 0xbfc1c2;
     const moonColor = 0xbfc1c2;
-    const moonLight = new THREE.PointLight(moonColor, 3000) // 회색빛, 강도 0.5
+    const moonLight = new THREE.PointLight(moonColor, 3000)
     moonLight.castShadow = true;
     scene.add(moonLight);
 
     // 달을 표현하기 위한 구체 추가
-    const moonGeometry = new THREE.SphereGeometry(1, 32, 32); // 반지름 1, 세부 사항 32
-    const moonMaterial = new THREE.MeshBasicMaterial({ color: moonColor }); // 회색
+    const moonGeometry = new THREE.SphereGeometry(1, 32, 32); // 달 크기
+    const moonMaterial = new THREE.MeshBasicMaterial({ color: moonColor });
     moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
     scene.add(moonMesh); // 씬에 추가
 
