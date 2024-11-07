@@ -28,7 +28,7 @@ class House {
         left_wall.position.set(0, this.length / 2, this.length / 2);
         left_wall.rotation.y = Math.PI / 2;
 
-        // 추가
+        // 추가하기
         this.scene.add(floor);
         this.scene.add(right_wall);
         this.scene.add(left_wall);
