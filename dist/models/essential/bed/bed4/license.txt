@@ -1,0 +1,11 @@
+Model Information:
+* title:	Bed
+* source:	https://sketchfab.com/3d-models/bed-94478363372f4ab592b338778b01549d
+* author:	buresin.eduard (https://sketchfab.com/buresin.eduard)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Bed" (https://sketchfab.com/3d-models/bed-94478363372f4ab592b338778b01549d) by buresin.eduard (https://sketchfab.com/buresin.eduard) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

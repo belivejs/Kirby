@@ -1,0 +1,11 @@
+Model Information:
+* title:	Sun chair
+* source:	https://sketchfab.com/3d-models/sun-chair-1e950e90c3e741acab07a1983d362386
+* author:	Helsingr (https://sketchfab.com/helsingr)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Sun chair" (https://sketchfab.com/3d-models/sun-chair-1e950e90c3e741acab07a1983d362386) by Helsingr (https://sketchfab.com/helsingr) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

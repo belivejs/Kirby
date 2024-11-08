@@ -12,6 +12,7 @@ class Furniture {
         this.path = path;
         this.furnitureName = furnitureName;
         this.model = null;
+        this.object3D = null;
         this.position = position;
         this.scale = { x: 1, y: 1, z: 1 };
     }
@@ -42,10 +43,12 @@ class Furniture {
             if(ifSelect){
                 Furniture.currentFurniture = this;
             }
-
+            console.log("rotate전까지");
             this.rotate(rotate);
 
+            console.log("add전까지");
             this.scene.add(this.model);
+            console.log("모델 : ", this.model);
         });
     }
 

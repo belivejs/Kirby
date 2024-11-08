@@ -1,9 +1,12 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/index.js', // 시작 파일
+  entry: {
+    indoor : './src/inDoorIndex.js', // 시작 파일
+    outdoor: './src/outDoorIndex.js'
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name]_bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
   mode: 'development', // 개발 모드
@@ -30,5 +33,6 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
     ],
-  },
+  }, 
 };
+

@@ -20,7 +20,7 @@ class Kirby{
     }
 
     //커비 모델 불러오고 애니메이션 세팅
-    _setupModel(path = 'data/kirby_base.glb'){
+    _setupModel(path = './data/kirby_base.glb'){
         new GLTFLoader().load(path, (gltf) => {
             var scale = 0.15;
             
@@ -54,7 +54,7 @@ class Kirby{
     }
 
     //모델 불러오고 애니메이션 세팅
-    _setupBubbleModel(path = 'data/cloud.glb'){
+    _setupBubbleModel(path = './data/cloud.glb'){
         new GLTFLoader().load(path, (gltf) => {
             var scale = 1.5;
             
