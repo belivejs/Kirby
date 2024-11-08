@@ -69,7 +69,7 @@ function init(){
     // 달 light source 추가
     // const moonColor = 0xbfc1c2;
     const moonColor = 0xbfc1c2;
-    const moonLight = new THREE.PointLight(moonColor, 500000);
+    const moonLight = new THREE.PointLight(moonColor, 50000);
     moonLight.castShadow = true;
     scene.add(moonLight);
 
@@ -82,13 +82,15 @@ function init(){
     // timer.js의 initializeTimer 함수로 회전 로직을 생성
     updatePositions = initializeTimer(gameTicks, sunLight, moonLight, sunMesh, moonMesh, scene, scene);
     
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // 세기 조절 (0.5)
+    scene.add(ambientLight);
 
     kirby = new THREE.Object3D();
     // 모델 로딩
     loader.load(
-        './data/kirby.glb',  // 모델 경로 (GLB 또는 GLTF)
+        './data/kirby_base.glb',  // 모델 경로 (GLB 또는 GLTF)
          function (glb) {
-            glb.scene.scale.set(0.7, 0.7, 0.7);
+            glb.scene.scale.set(0.1, 0.1, 0.1);
             glb.scene.position.set(15, 0, 10); // 모델을 왼쪽으로 이동
             kirby = glb.scene;
             scene.add(kirby);  // 씬에 모델 추가
@@ -316,17 +318,39 @@ function checkCollision(newPosition) {
     return false;
 }
 
+var isFinish = false;
 function controlProgressBar(change_value) {
+        
+
     if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
         progress = progress + change_value;
         updateProgressBar(progress);
     }
 
-    else if ((progress + change_value) < 0)
+    else if ((progress + change_value) < 0 && !isFinish){
         updateProgressBar(0);
+        isFinish = true;
 
-    else if ((progress + change_value) > 100)
+        const overlay = document.getElementById("overlay")
+        overlay.style.display = 'flex'
+        const text = document.getElementById("fail-text")
+        text.style.display = 'block'
+        
+    }
+
+    else if ((progress + change_value) > 100 && !isFinish){
         updateProgressBar(100);
+        isFinish=true
+
+        const overlay = document.getElementById("overlay")
+        overlay.style.display = 'flex'
+        const text = document.getElementById("complete-text")
+        text.style.display = 'block'
+
+        for (var i =0 ;i<30;i++){
+            createParticle();
+        }
+    }
 }
 
 function updateProgressBar(value) {
@@ -334,6 +358,22 @@ function updateProgressBar(value) {
     progressBar.textContent = `${value}%`;
 }
 
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+
+    // 랜덤한 위치와 애니메이션 딜레이 설정
+    particle.style.left = Math.random() * 100 + 'vw';
+    particle.style.animationDelay = Math.random() * 3 + 's';
+    particle.style.animationDuration = 2 + Math.random() * 3 + 's';
+
+    document.getElementById('particles').appendChild(particle);
+
+    // 애니메이션이 끝나면 파티클 삭제
+    particle.addEventListener('animationend', () => {
+        particle.remove();
+    });
+}
 
 init();
 animate();

@@ -17,7 +17,7 @@ var raycaster;
 var mouse;
 
 let updatePositions; // 회전 로직을 저장하는 변수
-let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
+let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 
 function init(){
@@ -57,7 +57,7 @@ function init(){
 
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
-    const sunLight = new THREE.PointLight(sunColor, 1000000)
+    const sunLight = new THREE.PointLight(sunColor, 500000)
     sunLight.castShadow = true;
     scene.add(sunLight);
 
@@ -70,7 +70,7 @@ function init(){
     // 달 light source 추가
     // const moonColor = 0xbfc1c2;
     const moonColor = 0xbfc1c2;
-    const moonLight = new THREE.PointLight(moonColor, 1000000)
+    const moonLight = new THREE.PointLight(moonColor, 10000)
     moonLight.castShadow = true;
     scene.add(moonLight);
 
@@ -85,19 +85,19 @@ function init(){
     
 
     
-    // // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
-    // const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 세기 조절 (0.5)
-    // scene.add(ambientLight);
+    // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // 세기 조절 (0.5)
+    scene.add(ambientLight);
     // const light = new THREE.DirectionalLight(0xffffff, 2);
     // light.position.set(50, 50, 50);
-    // // PointLight 생성 (흰색 빛, 강도 1, 거리 100)
-    // const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
 
-    // // 빛의 위치 설정 (예: x=10, y=10, z=10)
-    // pointLight.position.set(170, 200, 100);
-
-    // // 씬에 추가
-    // scene.add(pointLight);
+    // PointLight - 집 조명
+    const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
+    pointLight.position.set(200, 200, 150);
+    scene.add(pointLight);
+    const pointLight2 = new THREE.PointLight(0xffffff, 20000, 0);
+    pointLight2.position.set(150, 200, 150);
+    scene.add(pointLight2);
 
     // const pointLightHelper = new THREE.PointLightHelper(pointLight, 5); // 두 번째 매개변수는 크기
     // scene.add(pointLightHelper);
