@@ -12,40 +12,65 @@
             background-color: white;
         }
         #sidebar h2, #sidebar ul {
-            background-color: #f0f0f0; /* 사이드바 배경 색을 설정 */
-            z-index: 9999; /* z-index를 높여 canvas와 겹치지 않도록 설정 */
+            background-color: #f0f0f0;
+            z-index: 9999;
         }
         
+
+        /* Progress bar container */
+        #progressContainer {
+            position: fixed;
+            top: 150px;
+            left: 20px;
+            width: 200px;
+            background-color: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Progress bar itself */
+        #progressBar {
+            width: 30%;
+            height: 100%;
+            background-color: #4caf50;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         /* 상점 버튼 */
         #shopButton {
             position: fixed;
-            left: 240px;
-            top: 5px;
+            left: 20px;
+            top: 200px;
             padding: 10px 20px;
-            background-image: url('store.png'); /* 배경 이미지 설정 */
+            background-image: url('store.png');
             background-size: cover; 
             background-color: transparent;
             border: none;
             cursor: pointer;
-            width: 80px; /* 버튼의 너비를 설정 */
-            height: 80px; /* 버튼의 높이를 설정 */
+            width: 80px;
+            height: 80px;
         }
 
         /* 상점 버튼 */
         #houseButton {
             position: fixed;
-            left: 360px;
-            top: 5px;
+            left: 120px;
+            top: 200px;
             padding: 10px 20px;
-            background-image: url('house.png'); /* 배경 이미지 설정 */
+            background-image: url('house.png');
             background-size: cover; 
             background-color: transparent;
             border: none;
             cursor: pointer;
-            width: 80px; /* 버튼의 너비를 설정 */
-            height: 80px; /* 버튼의 높이를 설정 */
+            width: 80px;
+            height: 80px;
         }
-
     </style>
     <title>Test</title>
 </head>
@@ -77,17 +102,21 @@
     <button id = "angry">angry</button>
     <button id = 'sleeping'>sleep</button>
     <button id = "base">base</button>
-    <br>
-    <button id="houseButton" onclick = "goHouse()"></button>
     <button id="shopButton" onclick="openShop()"></button>
+    <button id="houseButton" onclick = "goHouse()"></button>
+    <div id="progressContainer">
+        <div id="progressBar">30%</div>
+    </div>
     <script>
         function openShop() {
             window.open('shop.html', '_self'); // 현재 창에서 shop.html 열기
         }
 
         function goHouse() {
-            window.open('outdoor_index.html', '_self'); // 내부 -> 외부 이동
+            window.open('outdoor_index.html', '_self');
         }
     </script>
+    
+
 </body>
 </html>
