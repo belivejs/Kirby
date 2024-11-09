@@ -344,23 +344,59 @@ function setColor(objectScene, color){
 }
 
 
-
+var isFinish = false;
 function controlProgressBar(change_value) {
     if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
         progress = progress + change_value;
         updateProgressBar(progress);
     }
 
-    else if ((progress + change_value) < 0)
+    else if ((progress + change_value) < 0 && !isFinish){
         updateProgressBar(0);
+        isFinish = true;
 
-    else if ((progress + change_value) > 100)
+        const overlay = document.getElementById("overlay")
+        overlay.style.display = 'flex'
+        const text = document.getElementById("fail-text")
+        text.style.display = 'block'
+    }
+
+    else if ((progress + change_value) > 100 && !isFinish){
         updateProgressBar(100);
+        isFinish=true
+
+        const overlay = document.getElementById("overlay")
+        overlay.style.display = 'flex'
+        const text = document.getElementById("complete-text")
+        text.style.display = 'block'
+
+        for (var i =0 ;i<30;i++){
+            createParticle();
+        }
+    }
 }
 
 function updateProgressBar(value) {
     progressBar.style.width = `${value}%`;
     progressBar.textContent = `${value}%`;
+}
+
+
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+
+    // 랜덤한 위치와 애니메이션 딜레이 설정
+    particle.style.left = Math.random() * 100 + 'vw';
+    particle.style.animationDelay = Math.random() * 3 + 's';
+    particle.style.animationDuration = 2 + Math.random() * 3 + 's';
+
+    document.getElementById('particles').appendChild(particle);
+
+    // 애니메이션이 끝나면 파티클 삭제
+    particle.addEventListener('animationend', () => {
+        particle.remove();
+    });
 }
 
 checkAndInitializeStorage();
