@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import House from './house.js';
+import Trash from './trash.js';
 import Kirby from './kirby.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -128,15 +129,15 @@ function chooseFurniture(){
 
             raycaster.setFromCamera(mouse, camera);
 
-            // // Raycaster 광선 시각화
-            // let arrowHelper;
+            // Raycaster 광선 시각화
+            let arrowHelper;
 
-            // const direction = raycaster.ray.direction.clone();
-            // const origin = raycaster.ray.origin.clone();
+            const direction = raycaster.ray.direction.clone();
+            const origin = raycaster.ray.origin.clone();
 
-            // const arrowLength = 30;
-            // arrowHelper = new THREE.ArrowHelper(direction, origin, arrowLength, 0xff0000);
-            // scene.add(arrowHelper);
+            const arrowLength = 30;
+            arrowHelper = new THREE.ArrowHelper(direction, origin, arrowLength, 0xff0000);
+            scene.add(arrowHelper);
 
             const intersects = raycaster.intersectObjects(scene.children, true);
 
@@ -163,7 +164,7 @@ function chooseFurniture(){
 
     let intersectedObject = null;
 
-    // 배치
+    // 선택한 가구 배치
     window.addEventListener('mousemove', (event) => {
 
         if(Furniture.currentFurniture){
@@ -188,53 +189,10 @@ function chooseFurniture(){
     });
 }
 
-// 가구 로드
-function furnitureUI() {
-    document.getElementById('menu-toggle').addEventListener('click', function(e) {
-        e.preventDefault();
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar.style.display === 'none') {
-            sidebar.style.display = 'block';
-        } else {
-            sidebar.style.display = 'none';
-        }
-    });
+// 가구 로드 예시 코드
+// const furnitureInstance = new Furniture(scene, furniture, furnitureName);
+// furnitureInstance.add();
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const furnitureArray = [
-            './models/essential/desk/desk1/scene.gltf',
-            './models/essential/desk/desk2/scene.gltf',
-            './models/essential/desk/desk3/scene.gltf',
-            './models/essential/desk/desk4/scene.gltf',
-            './models/essential/chair/chair1/scene.gltf',
-            './models/essential/chair/chair2/scene.gltf',
-            './models/essential/chair/chair3/scene.gltf',
-            './models/essential/chair/chair4/scene.gltf',
-            './models/essential/bed/bed1/scene.gltf',
-            './models/essential/bed/bed2/scene.gltf',
-            './models/essential/bed/bed3/scene.gltf',
-            './models/essential/bed/bed4/scene.gltf',
-            './models/essential/bath/bath1/scene.gltf',
-            './models/essential/bath/bath2/scene.gltf',
-            './models/essential/bath/bath3/scene.gltf',
-            './models/essential/bath/bath4/scene.gltf',
-        ];
-
-        const list = document.getElementById('furniture-list');
-        list.innerHTML = '';
-
-        furnitureArray.forEach(furniture => {
-            const furnitureName = furniture.split('/')[2]
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `<a href="#">${furniture}</a>`;
-            listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, furniture, furnitureName);
-                furnitureInstance.add();
-            });
-            list.appendChild(listItem);
-        });
-    });
-}
 
 document.addEventListener('keydown', (e) => {
     if (Furniture.currentFurniture) {
@@ -247,93 +205,40 @@ document.addEventListener('keydown', (e) => {
 });
 
 
-// function initFurniture() {
-//     const furnitureArray = [
-//         './models/essential/desk/desk2/scene.gltf',
-//         './models/essential/chair/chair1/scene.gltf',
-//         './models/essential/bed/bed1/scene.gltf',
-//         './models/essential/bath/bath2/scene.gltf',
-//     ];
-
-//     for (let i = 0; i < furnitureArray.length; i++) {
-//         try{
-//             console.log("가구 넣음");
-//             scene.add(furnitureArray[i]);
-
-//             switch (i) {
-//                 case 0:
-//                     const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:17, y:2.5041244718755564, z:9});
-//                     deskInstance.add(false, 90);
-//                     break;
-//                 case 1:
-//                     const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:22, y:12.500000000000012, z:21});
-//                     chairInstance.add(false, 180);
-//                     break;
-//                 case 2:
-//                     const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:88, y:22.499983113709934, z:16});
-//                     bedInstance.add(false, 0);
-//                     break;
-//                 case 3:
-//                     const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:32, y:2.500000000000014, z:76});
-//                     bathInstance.add(false, 0);
-//                     break;
-//                 default:
-//                     console.error('알 수 없는 가구 인덱스입니다.');
-//             }
-//         }catch(e){
-//             console.log(e)
-//         }
-        
-//     }
-
-// }
 function initFurniture() {
     const furnitureArray = [
         './models/essential/desk/desk2/scene.gltf',
         './models/essential/chair/chair1/scene.gltf',
         './models/essential/bed/bed1/scene.gltf',
-        './models/essential/bath/bath2/scene.gltf',
+        './models/essential/bath/bath3/scene.gltf',
     ];
 
-    const loader = new GLTFLoader();
-
-    furnitureArray.forEach((url, i) => {
-        loader.load(
-            url,
-            (gltf) => {
-                console.log("가구 넣음");
-                
-                // 모델을 씬에 추가
-                scene.add(gltf.scene);
-
-                // 위치 및 회전 설정
-                switch (i) {
-                    case 0:
-                        const deskInstance = new Furniture(scene, url, 'desk', {x:17, y:2.5041244718755564, z:9});
-                        deskInstance.add(false, 90);
-                        break;
-                    case 1:
-                        const chairInstance = new Furniture(scene, url, 'chair', {x:22, y:12.500000000000012, z:21});
-                        chairInstance.add(false, 180);
-                        break;
-                    case 2:
-                        const bedInstance = new Furniture(scene, url, 'bed', {x:88, y:22.499983113709934, z:16});
-                        bedInstance.add(false, 0);
-                        break;
-                    case 3:
-                        const bathInstance = new Furniture(scene, url, 'bath', {x:32, y:2.500000000000014, z:76});
-                        bathInstance.add(false, 0);
-                        break;
-                    default:
-                        console.error('알 수 없는 가구 인덱스입니다.');
-                }
-            },
-            undefined,
-            (error) => {
-                console.error(`Failed to load ${url}:`, error);
+    for (let i = 0; i < furnitureArray.length; i++) {
+        try{
+            switch (i) {
+                case 0:
+                    const deskInstance = new Furniture(scene, furnitureArray[i], "desk", {x:17, y:2.5041244718755564, z:9});
+                    deskInstance.add(false, 90);
+                    break;
+                case 1:
+                    const chairInstance = new Furniture(scene, furnitureArray[i], 'chair', {x:22, y:12.500000000000012, z:21});
+                    chairInstance.add(false, 180);
+                    break;
+                case 2:
+                    const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:16});
+                    bedInstance.add(false, 0);
+                    break;
+                case 3:
+                    const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 2, y: 3.332235320347188, z: 79});
+                    bathInstance.add(false, 0);
+                    break;
+                default:
+                    console.error('알 수 없는 가구 인덱스입니다.');
             }
-        );
-    });
+        }catch(e){
+            console.log(e)
+        }
+    }
 }
 
 // 애니메이션 루프
@@ -393,7 +298,8 @@ function setColor(objectScene, color){
 }
 
 init();
-furnitureUI();
 chooseFurniture();
 initFurniture();
+var trash = new Trash(scene, 1000, 5);
+trash.randomTrash();
 animate();

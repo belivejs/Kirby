@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import Furniture from './furniture';
+import Trash from './trash';
+import House from './house';
 
 
 class Kirby{
@@ -349,19 +351,21 @@ class Kirby{
             newPosition.set(this._model.position.x + moveX, this._model.position.y, this._model.position.z + moveZ)
             if(!this._doAction){//액션 없을 때
                 if(!this.checkCollision(newPosition)){
-                    //캐릭터 이동
-                    this._model.position.x += moveX;
-                    this._model.position.y = 0;
-                    this._model.position.z += moveZ; 
-                    //카메라 이동
-                    this._camera.position.x += moveX;
-                    this._camera.position.z += moveZ;
-                    //카메라가 바라보는 타겟을 캐릭터로 
-                    this._controls.target.set(
-                        this._model.position.x,
-                        this._model.position.y,
-                        this._model.position.z,
-                    );     
+                    if(newPosition.x <= House.groundWidth && newPosition.z <= House.groundLength){
+                        //캐릭터 이동
+                        this._model.position.x += moveX;
+                        this._model.position.y = 0;
+                        this._model.position.z += moveZ; 
+                        //카메라 이동
+                        this._camera.position.x += moveX;
+                        this._camera.position.z += moveZ;
+                        //카메라가 바라보는 타겟을 캐릭터로 
+                        this._controls.target.set(
+                            this._model.position.x,
+                            this._model.position.y,
+                            this._model.position.z,
+                        );     
+                    }
                 } else{ //부딪혔을때
                     this.collisionAction()
                 }
@@ -390,6 +394,15 @@ class Kirby{
                 console.log('Kirby와 가구가 충돌했습니다!', Furniture.getFurnitureName(furnitureModel));
                 const preCollision = this._collisionFurniture;
                 this._collisionFurniture = furnitureModel;
+                return true;
+            }
+        }
+        for (const wall of House.walls){
+            const wallBox = new THREE.Box3().setFromObject(wall);
+            // 상자가 겹치는지 확인
+            if (this._kirbyBox.intersectsBox(wallBox)) {
+                const preCollision = this._collisionFurniture;
+                this._collisionFurniture = wall;
                 return true;
             }
         }
@@ -449,7 +462,18 @@ class Kirby{
                 await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true);
                 this.moveKirby()
                 this.changeAnimation(null);
-            } 
+            } else if (name == 'trash'){
+                // 없애기가 안되서 안보이는 좌표로 날려버림
+                this._collisionFurniture.position.x = 9999;
+                this._collisionFurniture.position.y = 9999;
+                this._collisionFurniture.position.z = 9999;
+
+                // 쓰레기 현재 쓰레기 갯수 감소
+                Trash.downCount();
+
+                // 행복도 증가
+                
+            }
             //키보드 이벤트 다시 세팅
             document.addEventListener('keydown', this.keydownEvent);
             document.addEventListener('keyup', this.keyupEvent);
@@ -462,13 +486,29 @@ class Kirby{
         const size = new THREE.Vector3();
         box.getSize(size);
 
-        const moveX = size.x * 1.5
-        const moveZ = 0
+        const moveX = size.x * 1.5;
+        const moveZ = size.z * 1.5;
         
         //캐릭터 이동
-        this._model.position.x += moveX;
-        this._model.position.y = 0;
-        this._model.position.z += moveZ; 
+        if(this._model.position.x >= 0 && this._model.position.x < House.groundWidth/2 && this._model.position.z <= House.groundLength/2){
+            this._model.position.x += moveX;
+            this._model.position.y = 0;
+            this._model.position.z += moveZ; 
+        } else if (this._model.position.x > House.groundWidth/2 && this._model.position.z <= House.groundLength/2) {
+            this._model.position.x -= moveX;
+            this._model.position.y = 0;
+            this._model.position.z += moveZ; 
+        } else if (this._model.position.x >= 0 && this._model.position.x < House.groundWidth/2 && this._model.position.z > House.groundLength/2) {
+            this._model.position.x += moveX;
+            this._model.position.y = 0;
+            this._model.position.z -= moveZ; 
+        } else if (this._model.position.x > House.groundWidth/2 && this._model.position.z > House.groundLength/2) {
+            this._model.position.x -= moveX;
+            this._model.position.y = 0;
+            this._model.position.z -= moveZ; 
+        }
+
+        
         //카메라 이동
         this._camera.position.x += moveX;
         this._camera.position.z += moveZ;
@@ -477,7 +517,7 @@ class Kirby{
             this._model.position.x,
             this._model.position.y,
             this._model.position.z,
-        );     
+        );
     }
 
     render(time) {

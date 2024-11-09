@@ -1,5 +1,12 @@
 import * as THREE from 'three';
 class House {
+
+    static groundHeight;
+    static groundWidth;
+    static groundLength;
+
+    static walls = [];
+
     constructor(scene, width, length) {
         this.scene = scene;
         this.width = width;
@@ -28,6 +35,11 @@ class House {
         floor.position.set(this.width / 2, 0, this.length / 2);
         floor.rotation.x = -Math.PI / 2;
 
+        // floor 최대 y 값 구하기 -> 가구의 높이 정규화를 위해 사용
+        const modelBox = new THREE.Box3().setFromObject(floor);
+        House.groundWidth = modelBox.max.x - modelBox.min.x;
+        House.groundLength = modelBox.max.z - modelBox.min.z;
+        House.groundHeight = modelBox.max.y;
 
         // 벽
         const wallLoader = new THREE.TextureLoader();
@@ -58,18 +70,23 @@ class House {
         this.scene.add(floor);
         this.scene.add(right_wall);
         this.scene.add(left_wall);
+
+        // wall list에 추가
+        // 0: 왼쪽 벽 1: 오른쪽 벽
+        House.walls.push(left_wall);
+        House.walls.push(right_wall);
     }
     // Length setter/getter
     setLength(length) {
         this.length = length;
     }
-    getLength() {
+    static getLength() {
         return this.length;
     }
     setWidth(width) {
         this.width = width;
     }
-    getWidth() {
+    static getWidth() {
         return this.width;
     }
     // Floor color setter/getter
