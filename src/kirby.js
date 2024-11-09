@@ -202,20 +202,20 @@ class Kirby{
     //버튼으로 텍스쳐 변경
     setupTexture(){
         document.getElementById('dirty').onclick = () => {  
-            this.changeBobyTexture(this._model, "texture/Kirby/Kirby_dirty.jpg")
-            this.changeFaceTexture(this._model, "texture/Kirby/Kirby-Face_dirty.jpg")
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_dirty.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_dirty.jpg")
         }
         document.getElementById('angry').onclick = () => {
-            this.changeBobyTexture(this._model, "texture/Kirby/Kirby_angry.jpg")
-            this.changeFaceTexture(this._model, "texture/Kirby/Kirby-Face_angry.jpg")
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_angry.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_angry.jpg")
         }
         document.getElementById('sleeping').onclick = () => {
-            this.changeBobyTexture(this._model, "texture/Kirby/Kirby_sleeping.jpg")
-            this.changeFaceTexture(this._model, "texture/Kirby/Kirby-Face_sleeping.jpg")
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_sleeping.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_sleeping.jpg")
         }
         document.getElementById('base').onclick = () => {
-            this.changeBobyTexture(this._model, "texture/Kirby/Kirby_base.jpg")
-            this.changeFaceTexture(this._model, "texture/Kirby/Kirby-Face_base.jpg")        }
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")        }
     }
 
     //몸 텍스쳐 바꾸기
@@ -423,8 +423,8 @@ class Kirby{
                 this._bubbleModel.visible = true;
                 this._bubbleAnimationMap['bubble'].play();
                 await this.changeAnimation("cleaning");
-                this.changeBobyTexture(this._model, "texture/Kirby/Kirby_base.jpg")
-                this.changeFaceTexture(this._model, "texture/Kirby/Kirby-Face_base.jpg")
+                this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
                 this._bubbleModel.visible = false;
                 this._bubbleAnimationMap['bubble'].stop();
 
