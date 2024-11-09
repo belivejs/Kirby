@@ -12,4 +12,18 @@ module.exports = {
     open: true, // 서버 실행 시 브라우저를 자동으로 열기
     hot: true, // 핫 리로딩 활성화
   },
+
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+          },
+        ],
+      },
+    ],
+  },
+  
 };

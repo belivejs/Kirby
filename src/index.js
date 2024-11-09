@@ -1,19 +1,12 @@
 import * as THREE from 'three';
 import House from './house.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 var scene;
 var camera;
 var renderer;
 var controls;
-var loader = new GLTFLoader(); // 3D data loader
-
-//keyCode
-const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
-let kirbyScene;
-
 
 function init(){
     scene = new THREE.Scene();
@@ -24,12 +17,9 @@ function init(){
         1000 // 먼 절단면
     );
 
-    // dataLoader('data/kirby_pixar_3d.glb', 'kirby Model');
-    dataLoader('data/kirby.glb', 'kirby Model');
-    // dataLoader('data/cartoon_villa_wooden_house_low_polygon_3d_model.glb', 'kirby Model');
-
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x87CEEB);
     document.body.appendChild(renderer.domElement);
 
     camera.position.set(70, 60, 100);
@@ -41,18 +31,31 @@ function init(){
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
+    const light = new THREE.DirectionalLight(0xffffff, 4);
+    light.position.set(0, 10, 10);
     scene.add(light);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        // 모델 로딩
+        const loader = new GLTFLoader();
+        loader.load(
+        '../cartoon_villa_wooden_house_low_polygon_3d_model.glb',  // 모델 경로 (GLB 또는 GLTF)
+         function (glb) {
+            glb.scene.scale.set(5, 5, 5);
+            glb.scene.position.set(35, 0, 65); // 모델을 왼쪽으로 이동
+            scene.add(glb.scene);  // 씬에 모델 추가
+        },
+        undefined,
+        function (error) {
+            console.error(error);  // 로딩 중 에러 발생 시
+        }       
+        );
 
     // 집
-    const house = new House(scene, 50);
-    house.init()
+    // const house = new House(scene, 50);
+    // house.init();
 
-    //keyboard event
-    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+    addGrass();
+    addFence();
 }
 
 function animate() {
@@ -61,49 +64,73 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-/**
- * Data 파일을 로드하고 씬에 추가하기 위한 함수입니다.
- * GLB 파일을 권장합니다.
- * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
- * @param {string} fileName 로드한 파일의 이름. console에 찍어서 데이터 형식을 확인하려고 사용함.
- * @returns {null} 리턴은 없는데 객체 형태로 내보내고 싶어요.. 근데 안됨
- * @example // 사용 예
- * DataLoader('data/kirby_pixar_3d.glb', '커비')
- * // 콘솔 결과
- * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
- */
-function dataLoader(path, fileName){
-    loader.load(
-        path, // 3D data 경로.
-        function (gltf) { // Data 불러오는 함수
-            console.log(fileName, gltf);
-            const characterMesh = gltf;
-            kirbyScene = gltf.scene;
-            scene.add(kirbyScene);
-        },
-        undefined, 
-        function (error) {// 실패 시 에러 출력
-            console.error(error);
+function addGrass() {
+    // 잔디용 평면 지오메트리 생성
+
+    const grassGeometry = new THREE.PlaneGeometry(120, 120, 2); 
+
+    const textureLoader = new THREE.TextureLoader();
+    const textureBaseColor = textureLoader.load('../texture/Stylized_Stone_Floor_007_BaseColor.png');
+    const textureNormalMap = textureLoader.load('../texture/Stylized_Stone_Floor_007_Normal.png');
+    const textureHeightMap = textureLoader.load('../texture/Stylized_Stone_Floor_007_Height.png');
+    const textureRoughnessMap = textureLoader.load('../texture/Stylized_Stone_Floor_007_Roughness.png');
+
+    const grassMaterial = new THREE.MeshStandardMaterial({ 
+        map : textureBaseColor,
+        normalMap : textureNormalMap,
+        displacementMap: textureHeightMap, 
+        displacementScale : 0.5,
+        roughnessMap: textureRoughnessMap,
+        roughness: 0.5
+    });
+
+    const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+    grass.rotation.x = -Math.PI / 2; 
+    grass.position.set(50, 0, 50); 
+
+
+    scene.add(grass);
+}
+
+function addFence() {
+    const loader = new GLTFLoader();
+    loader.load('../simple_wood_fence.glb', function (glb) {
+        const fence = glb.scene;
+
+        // 울타리 크기 및 처음 위치 설정
+        fence.scale.set(2, 2, 2); // 크기 조정
+
+        // 동일한 울타리 복제하여 이어붙이기
+        for (let i = 0; i < 5; i++) {  // 10개의 울타리 이어붙이기
+            const fenceClone = fence.clone(); // 울타리 복제
+            fenceClone.position.set(0, 7, 10 + i*20); // 각 울타리를 옆으로 이동 (X 좌표)
+            scene.add(fenceClone);  // 씬에 복제한 울타리 추가
         }
-    );
-}
 
-/**
- * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
- * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
- */
-function moveKirbyByKeyBoard(e){
-    if(e.keyCode == LEFT){
-        kirbyScene.position.x -= 0.5;
-    } else if (e.keyCode == RIGHT){
-        kirbyScene.position.x += 0.5;
-    } else if (e.keyCode == FRONT){
-        kirbyScene.position.z += 0.5;
-    } else if (e.keyCode == BACK){
-        kirbyScene.position.z -= 0.5;
-    }
-}
+        // 동일한 울타리 복제하여 이어붙이기
+        for (let i = 0; i < 5; i++) {  // 10개의 울타리 이어붙이기
+            const fenceClone = fence.clone(); // 울타리 복제
+            fenceClone.position.set(100, 7, 10 + i*20); // 각 울타리를 옆으로 이동 (X 좌표)
+            scene.add(fenceClone);  // 씬에 복제한 울타리 추가
+        }
 
+        // 동일한 울타리 복제하여 이어붙이기
+        
+        for (let i = 0; i < 5; i++) {  // 10개의 울타리 이어붙이기
+            fence.rotation.y = Math.PI / 2; // 90도 회전 (라디안으로 설정)
+            const fenceClone = fence.clone(); // 울타리 복제
+            fenceClone.position.set(10 + i*20, 7, 100); // 각 울타리를 옆으로 이동 (X 좌표)
+            scene.add(fenceClone);  // 씬에 복제한 울타리 추가
+        }
+
+        for (let i = 0; i < 5; i++) {  // 10개의 울타리 이어붙이기
+            fence.rotation.y = Math.PI / 2; // 90도 회전 (라디안으로 설정)
+            const fenceClone = fence.clone(); // 울타리 복제
+            fenceClone.position.set(10 + i*20, 7, 0); // 각 울타리를 옆으로 이동 (X 좌표)
+            scene.add(fenceClone);  // 씬에 복제한 울타리 추가
+        }
+    });
+}
 
 init();
 animate();
