@@ -20,6 +20,20 @@ var mouse;
 let updatePositions; // 회전 로직을 저장하는 변수
 let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
+var progressBar;
+let progress = 30;
+progressBar = document.getElementById("progressBar");
+
+function checkAndInitializeStorage() {
+    // "isInitialized"라는 키가 없으면 새로 시작한 것이므로 초기화 진행
+    if (!localStorage.getItem("isInitialized")) {
+        // 초기 설정
+        localStorage.setItem("money", 0); // 돈을 10000원으로 초기화
+        localStorage.setItem("purchasedFurniture", JSON.stringify([])); // 구매한 가구를 빈 배열로 초기화
+        localStorage.setItem("isInitialized", true); // 초기화 여부 저장
+        console.log("프로젝트 초기화 완료");
+    }
+}
 
 function init(){
     scene = new THREE.Scene();
@@ -107,7 +121,8 @@ function init(){
     const house = new House(scene, 300, 250);
     house.init();
 
-    new Kirby(scene, renderer, camera, controls);    
+    new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);    
+
 
     requestAnimationFrame(animate);
 
@@ -193,6 +208,37 @@ function chooseFurniture(){
 // const furnitureInstance = new Furniture(scene, furniture, furnitureName);
 // furnitureInstance.add();
 
+// 가구 로드
+function furnitureUI() {
+    document.getElementById('menu-toggle').addEventListener('click', function(e) {
+        e.preventDefault();
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.style.display === 'none') {
+            sidebar.style.display = 'block';
+        } else {
+            sidebar.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const furnitureList = document.getElementById('furniture-list');
+        furnitureList.innerHTML = '';
+
+        // 로컬 스토리지에서 구매한 가구 리스트 불러오기
+        const purchasedFurniture = JSON.parse(localStorage.getItem('purchasedFurniture')) || [];
+
+        purchasedFurniture.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<a href="#">${item.name}</a>`;
+            furnitureList.appendChild(listItem);
+
+            listItem.addEventListener('click', function() {
+                const furnitureInstance = new Furniture(scene, item.modelPath, item.name);
+                furnitureInstance.add();
+            });
+        });
+    });
+}
 
 document.addEventListener('keydown', (e) => {
     if (Furniture.currentFurniture) {
@@ -297,9 +343,33 @@ function setColor(objectScene, color){
 
 }
 
+
+
+function controlProgressBar(change_value) {
+    if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
+        progress = progress + change_value;
+        updateProgressBar(progress);
+    }
+
+    else if ((progress + change_value) < 0)
+        updateProgressBar(0);
+
+    else if ((progress + change_value) > 100)
+        updateProgressBar(100);
+}
+
+function updateProgressBar(value) {
+    progressBar.style.width = `${value}%`;
+    progressBar.textContent = `${value}%`;
+}
+
+checkAndInitializeStorage();
+
 init();
+furnitureUI();
 chooseFurniture();
 initFurniture();
 var trash = new Trash(scene, 1000, 5);
 trash.randomTrash();
 animate();
+setInterval(() => controlProgressBar(3), 1000);

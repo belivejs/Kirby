@@ -110,5 +110,9 @@ class House {
     getRightWallColor() {
         return this.rightWallColor;
     }
+
+    static getFloor() {
+        return this.floor;
+    }
 }
 export default House;

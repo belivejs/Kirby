@@ -14,8 +14,9 @@ class Furniture {
         this.model = null;
         this.object3D = null;
         this.position = position;
-        this.scale = { x: 1, y: 1, z: 1 };
+        this.scale = { x: 0.7, y: 0.7, z: 0.7 };
     }
+
 
     add(ifSelect=true, rotate=0) {
         const loader = new GLTFLoader();
