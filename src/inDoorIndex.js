@@ -14,6 +14,7 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import {initializeTimer} from './timer.js';
 var loader = new GLTFLoader(); // 3D data loader
 
+
 var raycaster;
 var mouse;
 
