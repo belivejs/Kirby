@@ -5,7 +5,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { update } from 'three/examples/jsm/libs/tween.module.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import {initializeTimer} from './timer.js';
-import Kirby from './kirby.js';
 
 var scene;
 var camera;
@@ -14,7 +13,10 @@ var controls;
 var loader = new GLTFLoader(); //3D data loader
 var progressBar;
 
+//key Code
+const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
 let progress = 30;
+let kirby;
 let house;
 let fenceGroup1;
 let fenceGroup2;
@@ -67,7 +69,7 @@ function init(){
     // 달 light source 추가
     // const moonColor = 0xbfc1c2;
     const moonColor = 0xbfc1c2;
-    const moonLight = new THREE.PointLight(moonColor, 500000);
+    const moonLight = new THREE.PointLight(moonColor, 50000);
     moonLight.castShadow = true;
     scene.add(moonLight);
 
@@ -80,9 +82,24 @@ function init(){
     // timer.js의 initializeTimer 함수로 회전 로직을 생성
     updatePositions = initializeTimer(gameTicks, sunLight, moonLight, sunMesh, moonMesh, scene, scene);
     
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // 세기 조절 (0.5)
+    scene.add(ambientLight);
 
-    new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);
-    
+    kirby = new THREE.Object3D();
+    // 모델 로딩
+    loader.load(
+        './data/kirby_base.glb',  // 모델 경로 (GLB 또는 GLTF)
+         function (glb) {
+            glb.scene.scale.set(0.1, 0.1, 0.1);
+            glb.scene.position.set(15, 0, 10); // 모델을 왼쪽으로 이동
+            kirby = glb.scene;
+            scene.add(kirby);  // 씬에 모델 추가
+        },
+        undefined,
+        function (error) {
+            console.error(error);  // 로딩 중 에러 발생 시
+        }       
+    );
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -126,6 +143,9 @@ function init(){
 
     addGrass();
     addFence();
+    
+    //keyboard event
+    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
 }
 
 function animate() {
@@ -167,6 +187,54 @@ function addGrass() {
     scene.add(grass);
 }
 
+/**
+ * Data 파일을 로드하고 씬에 추가하기 위한 함수입니다.
+ * GLB 파일을 권장합니다.
+ * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
+ * @param {string} fileName 로드한 파일의 이름. console에 찍어서 데이터 형식을 확인하려고 사용함.
+ * @returns {null} 리턴은 없는데 객체 형태로 내보내고 싶어요.. 근데 안됨
+ * @example // 사용 예
+ * DataLoader('data/kirby_pixar_3d.glb', '커비')
+ * // 콘솔 결과
+ * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
+ */
+// function dataLoader(path, target){
+//     loader.load(
+//         path, // 3D data 경로.
+//         function (gltf) { // Data 불러오는 함수
+//             target.add(gltf.scene);
+//         },
+//         undefined, 
+//         function (error) {// 실패 시 에러 출력
+//             console.error(error);
+//         }
+//     );
+// }
+
+/**
+ * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
+ * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+ */
+function moveKirbyByKeyBoard(e){
+    let moveDistance = 2;  // 이동 거리
+    let newPosition = new THREE.Vector3();
+
+    // 키 입력에 따른 캐릭터의 새로운 위치 설정
+    if (e.keyCode == LEFT) {
+        newPosition.set(-moveDistance, 0, 0);  // 왼쪽 이동
+    } else if (e.keyCode == RIGHT) {
+        newPosition.set(moveDistance, 0, 0);  // 오른쪽 이동
+    } else if (e.keyCode == FRONT) {
+        newPosition.set(0, 0, -moveDistance);  // 앞으로 이동
+    } else if (e.keyCode == BACK) {
+        newPosition.set(0, 0, moveDistance);  // 뒤로 이동
+    }
+
+    // 충돌 여부 확인 후 이동
+    if (!checkCollision(newPosition)) {
+        kirby.position.add(newPosition);  // 충돌하지 않으면 이동
+    }
+}
 
 function addFence() {
     const loader = new GLTFLoader();
@@ -250,17 +318,39 @@ function checkCollision(newPosition) {
     return false;
 }
 
+var isFinish = false;
 function controlProgressBar(change_value) {
+        
+
     if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
         progress = progress + change_value;
         updateProgressBar(progress);
     }
 
-    else if ((progress + change_value) < 0)
+    else if ((progress + change_value) < 0 && !isFinish){
         updateProgressBar(0);
+        isFinish = true;
 
-    else if ((progress + change_value) > 100)
+        const overlay = document.getElementById("overlay")
+        overlay.style.display = 'flex'
+        const text = document.getElementById("fail-text")
+        text.style.display = 'block'
+        
+    }
+
+    else if ((progress + change_value) > 100 && !isFinish){
         updateProgressBar(100);
+        isFinish=true
+
+        const overlay = document.getElementById("overlay")
+        overlay.style.display = 'flex'
+        const text = document.getElementById("complete-text")
+        text.style.display = 'block'
+
+        for (var i =0 ;i<30;i++){
+            createParticle();
+        }
+    }
 }
 
 function updateProgressBar(value) {
@@ -268,6 +358,22 @@ function updateProgressBar(value) {
     progressBar.textContent = `${value}%`;
 }
 
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+
+    // 랜덤한 위치와 애니메이션 딜레이 설정
+    particle.style.left = Math.random() * 100 + 'vw';
+    particle.style.animationDelay = Math.random() * 3 + 's';
+    particle.style.animationDuration = 2 + Math.random() * 3 + 's';
+
+    document.getElementById('particles').appendChild(particle);
+
+    // 애니메이션이 끝나면 파티클 삭제
+    particle.addEventListener('animationend', () => {
+        particle.remove();
+    });
+}
 
 init();
 animate();

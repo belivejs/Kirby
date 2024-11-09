@@ -1,0 +1,11 @@
+Model Information:
+* title:	Princess bed
+* source:	https://sketchfab.com/3d-models/princess-bed-3ed408980a9b4f9396a7f7c48ec50aa4
+* author:	cebraVFX (https://sketchfab.com/intervirtual)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Princess bed" (https://sketchfab.com/3d-models/princess-bed-3ed408980a9b4f9396a7f7c48ec50aa4) by cebraVFX (https://sketchfab.com/intervirtual) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

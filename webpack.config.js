@@ -12,7 +12,7 @@ module.exports = {
   mode: 'development', // 개발 모드
   devServer: {
     static: './dist', // 파일을 서빙할 디렉토리
-    open:  'outdoor_Index.html', // 서버 실행 시 브라우저를 자동으로 열기
+    open: 'outdoor_Index.html', // 서버 실행 시 브라우저를 자동으로 열기
     hot: true, // 핫 리로딩 활성화
   },
   module: {
@@ -35,3 +35,4 @@ module.exports = {
     ],
   }, 
 };
+

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import House from './house.js';
+import Trash from './trash.js';
 import Kirby from './kirby.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -17,12 +18,11 @@ var raycaster;
 var mouse;
 
 let updatePositions; // 회전 로직을 저장하는 변수
-let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
+let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 var progressBar;
 let progress = 30;
 progressBar = document.getElementById("progressBar");
-
 
 function checkAndInitializeStorage() {
     // "isInitialized"라는 키가 없으면 새로 시작한 것이므로 초기화 진행
@@ -69,26 +69,10 @@ function init(){
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    // 조명 추가
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2); // 세기 조절
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(50, 50, 50); 
-    scene.add(directionalLight);
-    
-    const pointLight = new THREE.PointLight(0xffffff, 2000, 0);
-    pointLight.position.set(130, 200, 100);
-    pointLight.castShadow = true; // 그림자 활성화
-    scene.add(pointLight);
-
-    const pointLightHelper = new THREE.PointLightHelper(pointLight, 5); 
-    scene.add(pointLightHelper);
-
 
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
-    const sunLight = new THREE.PointLight(sunColor, 1000000)
+    const sunLight = new THREE.PointLight(sunColor, 500000)
     sunLight.castShadow = true;
     scene.add(sunLight);
 
@@ -101,7 +85,7 @@ function init(){
     // 달 light source 추가
     // const moonColor = 0xbfc1c2;
     const moonColor = 0xbfc1c2;
-    const moonLight = new THREE.PointLight(moonColor, 1000000)
+    const moonLight = new THREE.PointLight(moonColor, 10000)
     moonLight.castShadow = true;
     scene.add(moonLight);
 
@@ -116,19 +100,19 @@ function init(){
     
 
     
-    // // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
-    // const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 세기 조절 (0.5)
-    // scene.add(ambientLight);
+    // Ambient Light 추가 (장면 전체에 부드러운 조명 제공)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // 세기 조절 (0.5)
+    scene.add(ambientLight);
     // const light = new THREE.DirectionalLight(0xffffff, 2);
     // light.position.set(50, 50, 50);
-    // // PointLight 생성 (흰색 빛, 강도 1, 거리 100)
-    // const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
 
-    // // 빛의 위치 설정 (예: x=10, y=10, z=10)
-    // pointLight.position.set(170, 200, 100);
-
-    // // 씬에 추가
-    // scene.add(pointLight);
+    // PointLight - 집 조명
+    const pointLight = new THREE.PointLight(0xffffff, 20000, 0);
+    pointLight.position.set(200, 200, 150);
+    scene.add(pointLight);
+    const pointLight2 = new THREE.PointLight(0xffffff, 20000, 0);
+    pointLight2.position.set(150, 200, 150);
+    scene.add(pointLight2);
 
     // const pointLightHelper = new THREE.PointLightHelper(pointLight, 5); // 두 번째 매개변수는 크기
     // scene.add(pointLightHelper);
@@ -138,6 +122,7 @@ function init(){
     house.init();
 
     new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);    
+
 
     requestAnimationFrame(animate);
 
@@ -159,7 +144,7 @@ function chooseFurniture(){
 
             raycaster.setFromCamera(mouse, camera);
 
-            // // Raycaster 광선 시각화
+            // Raycaster 광선 시각화
             // let arrowHelper;
 
             // const direction = raycaster.ray.direction.clone();
@@ -194,7 +179,7 @@ function chooseFurniture(){
 
     let intersectedObject = null;
 
-    // 배치
+    // 선택한 가구 배치
     window.addEventListener('mousemove', (event) => {
 
         if(Furniture.currentFurniture){
@@ -218,6 +203,10 @@ function chooseFurniture(){
         }
     });
 }
+
+// 가구 로드 예시 코드
+// const furnitureInstance = new Furniture(scene, furniture, furnitureName);
+// furnitureInstance.add();
 
 // 가구 로드
 function furnitureUI() {
@@ -264,32 +253,29 @@ document.addEventListener('keydown', (e) => {
 
 function initFurniture() {
     const furnitureArray = [
-        'models/essential/desk/desk2/scene.gltf',
-        'models/essential/chair/chair1/scene.gltf',
-        'models/essential/bed/bed1/scene.gltf',
-        'models/essential/bath/bath4/scene.gltf',
+        './models/essential/desk/desk2/scene.gltf',
+        './models/essential/chair/chair1/scene.gltf',
+        './models/essential/bed/bed1/scene.gltf',
+        './models/essential/bath/bath3/scene.gltf',
     ];
 
     for (let i = 0; i < furnitureArray.length; i++) {
         try{
-            console.log("가구 넣음");
-            scene.add(furnitureArray[i]);
-
             switch (i) {
                 case 0:
-                    const deskInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:17, y:2.5041244718755564, z:9});
+                    const deskInstance = new Furniture(scene, furnitureArray[i], "desk", {x:17, y:2.5041244718755564, z:9});
                     deskInstance.add(false, 90);
                     break;
                 case 1:
-                    const chairInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:22, y:12.500000000000012, z:21});
+                    const chairInstance = new Furniture(scene, furnitureArray[i], 'chair', {x:22, y:12.500000000000012, z:21});
                     chairInstance.add(false, 180);
                     break;
                 case 2:
-                    const bedInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:150, y:22.499983113709934, z:40});
+                    const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:16});
                     bedInstance.add(false, 0);
                     break;
                 case 3:
-                    const bathInstance = new Furniture(scene, furnitureArray[i], furnitureArray[i].split('/')[2], {x:150, y:2.500000000000014, z:150});
+                    const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 2, y: 3.332235320347188, z: 79});
                     bathInstance.add(false, 0);
                     break;
                 default:
@@ -298,9 +284,7 @@ function initFurniture() {
         }catch(e){
             console.log(e)
         }
-        
     }
-
 }
 
 // 애니메이션 루프
@@ -359,6 +343,8 @@ function setColor(objectScene, color){
 
 }
 
+
+
 function controlProgressBar(change_value) {
     if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
         progress = progress + change_value;
@@ -378,9 +364,12 @@ function updateProgressBar(value) {
 }
 
 checkAndInitializeStorage();
+
 init();
 furnitureUI();
 chooseFurniture();
 initFurniture();
+var trash = new Trash(scene, 1000, 5);
+trash.randomTrash();
 animate();
 setInterval(() => controlProgressBar(3), 1000);
