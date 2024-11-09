@@ -130,14 +130,14 @@ function chooseFurniture(){
             raycaster.setFromCamera(mouse, camera);
 
             // Raycaster 광선 시각화
-            let arrowHelper;
+            // let arrowHelper;
 
-            const direction = raycaster.ray.direction.clone();
-            const origin = raycaster.ray.origin.clone();
+            // const direction = raycaster.ray.direction.clone();
+            // const origin = raycaster.ray.origin.clone();
 
-            const arrowLength = 30;
-            arrowHelper = new THREE.ArrowHelper(direction, origin, arrowLength, 0xff0000);
-            scene.add(arrowHelper);
+            // const arrowLength = 30;
+            // arrowHelper = new THREE.ArrowHelper(direction, origin, arrowLength, 0xff0000);
+            // scene.add(arrowHelper);
 
             const intersects = raycaster.intersectObjects(scene.children, true);
 
