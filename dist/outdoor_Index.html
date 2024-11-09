@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <style>
+        /* Progress bar container */
+        #progressContainer {
+            position: fixed;
+            top: 20px; /* 화면의 아래쪽에 위치 */
+            left: 20px; /* 화면의 왼쪽에 위치 */
+            width: 200px; /* 컨테이너 가로 크기 */
+            background-color: #e0e0e0;
+            height: 20px; /* 컨테이너 높이 */
+            border-radius: 10px; /* 모서리를 둥글게 */
+            overflow: hidden; /* 내부 요소가 넘치지 않도록 */
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+        }
+
+        /* Progress bar itself */
+        #progressBar {
+            width: 30%; /* 초기 값: 30% */
+            height: 100%;
+            background-color: #4caf50;
+            text-align: center;
+            color: white;
+            line-height: 20px; /* 세로 가운데 정렬 */
+            font-size: 12px; /* 글자 크기 */
+            font-weight: bold;
+        }
+
+        /* 상점 버튼 */
+        #shopButton {
+            position: fixed;
+            left: 20px;
+            top: 60px;
+            padding: 10px 20px;
+            background-image: url('store.png'); /* 배경 이미지 설정 */
+            background-size: cover; 
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            width: 80px; /* 버튼의 너비를 설정 */
+            height: 80px; /* 버튼의 높이를 설정 */
+        }
+
+        /* 상점 버튼 */
+        #houseButton {
+            position: fixed;
+            left: 120px;
+            top: 55px;
+            padding: 10px 20px;
+            background-image: url('house.png'); /* 배경 이미지 설정 */
+            background-size: cover; 
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            width: 80px; /* 버튼의 너비를 설정 */
+            height: 80px; /* 버튼의 높이를 설정 */
+        }
+
+    </style>
+</head>
+<body>
+    <button id="shopButton" onclick="openShop()"></button>
+    <button id="houseButton" onclick = "goHouse()"></button>
+    <div id="progressContainer">
+        <div id="progressBar">30%</div>
+    </div>
+    <script>
+        function openShop() {
+            window.open('shop.html', '_self'); // 현재 창에서 shop.html 열기
+        }
+
+        function goHouse() {
+            window.open('indoor_index.html', '_self'); // 외부 -> 내부 이동
+        }
+    </script>
+    <script type="module" src="outdoor_bundle.js"></script>
+</body>
+</html>
