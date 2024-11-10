@@ -102,6 +102,10 @@ class Furniture {
             return foundFurniture.furnitureName;
         }
     }
+    
+    static removeFurniture(object){
+        Furniture.backupFurnitureList.pop(object);
+    }
 }
 
 export default Furniture;

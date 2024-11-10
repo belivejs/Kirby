@@ -405,6 +405,6 @@ init();
 furnitureUI();
 chooseFurniture();
 initFurniture();
-var trash = new Trash(scene, 1000, 5);
+var trash = new Trash(scene, 60000, 5);
 trash.randomTrash();
 animate();

@@ -480,12 +480,15 @@ class Kirby{
                 this.changeAnimation(null);
             } else if (name == 'trash'){
                 // 없애기가 안되서 안보이는 좌표로 날려버림
+                // Furniture.findFurniture(this._collisionFurniture);
                 this._collisionFurniture.position.x = 9999;
                 this._collisionFurniture.position.y = 9999;
                 this._collisionFurniture.position.z = 9999;
 
                 // 쓰레기 현재 쓰레기 갯수 감소
-                Trash.downCount(this._collisionFurniture);
+                Trash.downCount();
+                Furniture.removeFurniture(this._collisionFurniture);
+                Furniture.saveToLocalStorage();
 
                 // 행복도 증가
                 
