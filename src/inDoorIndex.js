@@ -123,7 +123,6 @@ function init(){
 
     new Kirby(scene, renderer, camera, controls, 0.15,controlProgressBar, updateProgressBar);    
 
-
     requestAnimationFrame(animate);
 
 }

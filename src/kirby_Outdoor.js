@@ -360,8 +360,8 @@ class Kirby{
             newPosition.set(this._model.position.x + moveX, this._model.position.y, this._model.position.z + moveZ)
             if(!this._doAction){//액션 없을 때
                 if(!this.checkCollision(newPosition)){
-                    if(3 <= this._model.position.x && this._model.position.x <= 97
-                        && 4 <= this._model.position.z && this._model.position.z <= 97){
+                    // console.log(this._model.position);
+                    if((3 <= this._model.position.x && this._model.position.x <= 97&& 4 <= this._model.position.z && this._model.position.z <= 97)){
                         //캐릭터 이동
                         this._model.position.x += moveX;
                         this._model.position.y = 0;
@@ -386,11 +386,30 @@ class Kirby{
                         else if(this._model.position.z > 97)
                             this._model.position.z = 96;
                     }
+                    // 왼쪽 충돌
+                    if(30 <= this._model.position.x && this._model.position.x <= 35 &&
+                        18 <= this._model.position.z && this._model.position.z <= 56)
+                        this._model.position.x = 30;    
+                        
+                    // 위쪽 충돌
+                    else if(33 <= this._model.position.x && this._model.position.x <= 66 &&
+                        17 <= this._model.position.z && this._model.position.z <= 20)
+                        this._model.position.z= 17;
+                    // 오른쪽 충돌
+                    else if(65 <= this._model.position.x && this._model.position.x <= 73 &&
+                        18 <= this._model.position.z && this._model.position.z <= 56)
+                        this._model.position.x = 74;
+                    // 아래쪽 충돌
+                    else if(33 <= this._model.position.x && this._model.position.x <= 66 &&
+                        52 <= this._model.position.z && this._model.position.z <= 56)
+                        this._model.position.z = 56;
+                    }
+                    
                 } else{ //부딪혔을때
-                    this.collisionAction()
+                    this.collisionAction();
                 }
             }
-        }
+        
 
         // if(this._model)
         //     this.checkCollision()
@@ -404,7 +423,7 @@ class Kirby{
         this._kirbyBox = new THREE.Box3().setFromObject(this._model);
         this._kirbyBox.expandByScalar(-5); // 숫자만큼 모든 방향에서 줄이기
         this._kirbyBox.translate(newPosition.clone().sub(this._model.position)); // 새로운 위치로 Kirby 박스를 이동
-
+            
         for (const furnitureModel of Furniture.furnitureModelList){
             const furnitureBox = new THREE.Box3().setFromObject(furnitureModel);
             // var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자

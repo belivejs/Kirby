@@ -24,6 +24,9 @@ let fenceClone1;
 let fenceClone2;
 let fenceClone3;
 let fenceClone4;
+let houseBox;
+const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
+let kirby;
 
 //태양 달 효과
 let updatePositions; // 회전 로직을 저장하는 변수
@@ -82,6 +85,7 @@ function init(){
         scene.background = texture;
     });
 
+
     addGrass();
     addFence();
 
@@ -136,7 +140,10 @@ function init(){
     loader.load(
         './data/cartoon_house.glb',  // 모델 경로 (GLB 또는 GLTF)
          function (glb) {
+            house.position.set(93, -35, 0);
             house = glb.scene;
+            houseBox = new THREE.Box3().setFromObject(house);
+            // console.log(houseBox);
             house.scale.set(5, 5, 5);
             house.position.set(93, -35, 0); // 모델을 왼쪽으로 이동
             scene.add(house);  // 씬에 모델 추가
@@ -145,9 +152,11 @@ function init(){
         function (error) {
             console.error(error);  // 로딩 중 에러 발생 시
         }       
-    );
-    
-    new Kirby(scene, renderer, camera, controls, 0.05, controlProgressBar, updateProgressBar);
+    );  
+
+    kirby = new Kirby(scene, renderer, camera, controls, 0.05,controlProgressBar, updateProgressBar);
+
+
     requestAnimationFrame(animate);
 }
 

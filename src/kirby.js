@@ -361,7 +361,7 @@ class Kirby{
             if(!this._doAction){//액션 없을 때
                 if(!this.checkCollision(newPosition)){
                     if(newPosition.x <= House.groundWidth && newPosition.z <= House.groundLength){
-                        console.log("Movde!#!@$@!$!%$@!$@!");
+                        
                         //캐릭터 이동
                         this._model.position.x += moveX;
                         this._model.position.y = 0;
