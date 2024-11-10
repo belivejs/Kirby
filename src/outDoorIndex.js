@@ -11,9 +11,10 @@ var scene, camera, renderer, controls;
 var loader = new GLTFLoader(); //3D data loader
 var progressBar;
 
-let progress = 30;
+//key Code
 
-// let kirby;
+let intervalId;
+let kirby;
 let house;
 let fenceGroup1;
 let fenceGroup2;
@@ -36,6 +37,25 @@ let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 
 progressBar = document.getElementById("progressBar");
+
+function checkAndInitializeStorage() {
+    // "isInitialized"라는 키가 없으면 새로 시작한 것이므로 초기화 진행
+    if (!sessionStorage.getItem("isInitialized")) {
+        sessionStorage.clear();
+
+        // 초기 설정
+        sessionStorage.setItem("money", 0); // 돈을 10000원으로 초기화
+        sessionStorage.setItem("purchasedFurniture", JSON.stringify([])); // 구매한 가구를 빈 배열로 초기화
+        sessionStorage.setItem("isInitialized", true); // 초기화 여부 저장
+        console.log("프로젝트 초기화 완료");
+        sessionStorage.setItem("progressBar", 30); // Default progress value
+        sessionStorage.setItem("isFinish", "false"); // Reset finish status
+        isFinish = false; // Reset in-memory finish status
+        updateProgressBar(30); // Reset progress bar visually
+    }
+}
+
+
 
 // 가구 로드
 function furnitureUI() {
@@ -168,8 +188,12 @@ function init(){
 
     kirby = new Kirby(scene, renderer, camera, controls, 0.05,controlProgressBar, updateProgressBar);
 
-
-    requestAnimationFrame(animate);
+    initializeProgressBar();
+    addGrass();
+    addFence();
+    
+    //keyboard event
+    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
 }
 
 function animate() {
@@ -269,70 +293,84 @@ function addFence() {
     });
 }
 
-var isFinish = false;
-function controlProgressBar(change_value) {
-    if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
-        progress = progress + change_value;
-        updateProgressBar(progress);
+function checkCollision(newPosition) {
+    const kirbyBox = new THREE.Box3().setFromObject(kirby);
+    kirbyBox.translate(newPosition);  // 캐릭터의 이동할 위치로 Box를 이동
+
+    const houseBox = new THREE.Box3().setFromObject(house);
+
+    const fenceBox1 = new THREE.Box3().setFromObject(fenceGroup1);
+    const fenceBox2 = new THREE.Box3().setFromObject(fenceGroup2);
+    const fenceBox3 = new THREE.Box3().setFromObject(fenceGroup3);
+    const fenceBox4 = new THREE.Box3().setFromObject(fenceGroup4);
+
+    if (kirbyBox.intersectsBox(houseBox)) {
+        controlProgressBar(5);
+        return true;  // 충돌 발생 시 true 반환
     }
 
-    else if ((progress + change_value) < 0 && !isFinish){
-        updateProgressBar(0);
-        isFinish = true;
-
-        const overlay = document.getElementById("overlay")
-        overlay.style.display = 'flex'
-        const text = document.getElementById("fail-text")
-        text.style.display = 'block'
-        
+    if (kirbyBox.intersectsBox(fenceBox1) || kirbyBox.intersectsBox(fenceBox2) 
+        || kirbyBox.intersectsBox(fenceBox3) || kirbyBox.intersectsBox(fenceBox4)) {
+        controlProgressBar(-5);
+        return true;  // 충돌 발생 시 true 반환
     }
-
-    else if ((progress + change_value) > 100 && !isFinish){
-        updateProgressBar(100);
-        isFinish=true
-
-        const overlay = document.getElementById("overlay")
-        overlay.style.display = 'flex'
-        const text = document.getElementById("complete-text")
-        text.style.display = 'block'
-
-        for (var i =0 ;i<30;i++){
-            createParticle();
-        }
-    }
+    return false;
 }
 
+
+var isFinish = sessionStorage.getItem("isFinish") === "true" || false; // 로컬스토리지에서 완료 여부 가져오기
+
+// Initialize progressBar with value from sessionStorage or default to 30%
+function initializeProgressBar() {
+    const savedProgress = sessionStorage.getItem("progressBar");
+    const initialProgress = savedProgress !== null ? parseInt(savedProgress) : 30; // 기본값을 30%로 설정
+    updateProgressBar(initialProgress);
+}
+
+// Update progressBar and save to sessionStorage
 function updateProgressBar(value) {
     progressBar.style.width = `${value}%`;
     progressBar.textContent = `${value}%`;
+    sessionStorage.setItem("progressBar", value); // Save to sessionStorage
 }
 
-function createParticle() {
-    const particle = document.createElement('div');
-    particle.classList.add('particle');
 
-    // 랜덤한 위치와 애니메이션 딜레이 설정
-    particle.style.left = Math.random() * 100 + 'vw';
-    particle.style.animationDelay = Math.random() * 3 + 's';
-    particle.style.animationDuration = 2 + Math.random() * 3 + 's';
+// Function to control progress and display messages if 100% or 0%
+function controlProgressBar(changeValue) {
+    let currentProgress = parseInt(sessionStorage.getItem("progressBar"));
+    currentProgress = Math.min(100, Math.max(0, currentProgress + changeValue)); // 제한 범위 설정
+    updateProgressBar(currentProgress);
+    console.log(currentProgress);
 
-    document.getElementById('particles').appendChild(particle);
 
-    // 애니메이션이 끝나면 파티클 삭제
-    particle.addEventListener('animationend', () => {
-        particle.remove();
-    });
+    // 성공 메시지
+    if (currentProgress >= 100 && !isFinish) {
+        isFinish = true;
+        sessionStorage.setItem("isFinish", "true");
+        showOverlayMessage("complete-text");
+        console.log("complete");
+        clearInterval(intervalId); // 0%에 도달하면 반복 중지
+    }
+    // 실패 메시지
+    else if (currentProgress <= 0 && !isFinish) {
+        isFinish = true;
+        sessionStorage.setItem("isFinish", "true");
+        showOverlayMessage("fail-text");
+        clearInterval(intervalId); // 0%에 도달하면 반복 중지
+    }
 }
 
-function addDoor(){
-    let doorPath = './models/essential/door/door/scene.gltf';
-    const doorInstance = new Furniture(scene, doorPath, 'door', {x:59, y:0, z: 55}, false, 0, 15);
-    doorInstance.add(false, () => {
-        doorInstance.model.visible = false;
-    });
-
+// Function to display overlay message
+function showOverlayMessage(messageId) {
+    console.log(messageId);
+    const overlay = document.getElementById("overlay");
+    overlay.style.display = "flex";
+    document.getElementById(messageId).style.display = "block";
 }
 
+checkAndInitializeStorage();
+// Initialize progressBar at the very beginning
+initializeProgressBar();
 init();
 animate();
-setInterval(() => controlProgressBar(3), 100000);
+intervalId = setInterval(() => controlProgressBar(3), 5000);

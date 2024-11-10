@@ -11,9 +11,29 @@
             height: 100%;
             background-color: white;
         }
-        #sidebar h2, #sidebar ul {
-            background-color: #f0f0f0;
-            z-index: 9999;
+        
+        #sidebar {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            width: 200px;
+            height: 300px; /* 원하는 높이 설정 */
+            background-color: white;
+            overflow-y: auto; /* 스크롤 활성화 */
+        }
+        #sidebar h2 {
+            margin: 0;
+            padding: 10px;
+            background-color: white;
+        }
+        #furniture-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #furniture-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
         
 
@@ -71,12 +91,105 @@
             width: 80px;
             height: 80px;
         }
+
+        /* Canvas 위의 overlay 레이어 */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* 톤다운 효과 */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            z-index: 1000; /* Canvas 위에 위치 */
+           
+        }
+        /* 텍스트 컨테이너 */
+        #text-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10; /* Canvas 위에 배치 */
+        }
+
+        /* 큰 "Complete" 텍스트 */
+        #complete-text {
+            font-size: 5em;
+            color: #ffffff;
+            display: none;
+            margin: 0;
+        }
+        /* 큰 "Complete" 텍스트 */
+        #fail-text {
+            font-size: 5em;
+            color: #ffffff;
+            display: none;
+            margin: 0;
+        }
+
+        /* 작은 "Credit" 텍스트 */
+        #credit-text {
+            font-size: 1.0em;
+            color: #dddddd;
+            margin-top: 10px; /* Complete 텍스트 아래에 간격 추가 */
+        }
+        #particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 5;
+        }
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #ffff99;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(100vh);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            }
+            @keyframes float {
+                0% {
+                    transform: translateY(100vh);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(0);
+                    opacity: 0;
+                }
+            }
+
     </style>
+
     <title>Test</title>
 </head>
 <body>
+    <div id="overlay" onload="createParticle()">
+        <div id="text-container">
+            <h1 id="complete-text">Congratulation!</h1>
+            <h1 id="fail-text">Fail</h1>
+            <p id="credit-text">made by : Yejin Kim, Hyeonji Kim, Junseo Choi, Joonseo Choi</p>
+        </div>        
+        <div id="particles"></div>
+    </div>
     <div id="menu" style="position: absolute; top: 10px; right: 10px;">
-        <div id="sidebar" style="position: absolute; top: 24px; right: 0; width: 250px; height: 100%; display: none;">
+        <div id="sidebar">
             <h2 style="background-color: #f0f0f0;">가구 선택</h2>
             <ul id="furniture-list">
                 
