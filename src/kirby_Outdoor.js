@@ -116,7 +116,7 @@ class Kirby{
             this._currentAnimationAction = this._animationMap["walk"];   
             this._speed = 1.5;   
             this._maxSpeed = 40;
-            this._acceleration = 3;
+            this._acceleration = 1.5;
         } else {
             this._currentAnimationAction = null;
             this._speed = 0;

@@ -27,7 +27,7 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
         const currentTime = Date.now();
         const elapsedTime = currentTime - startTime;
 
-        const radius = 400; // 회전 반경
+        const radius = 500; // 회전 반경
         const time = (Date.now() - startTime) * 0.001; // 경과 시간을 사용하여 시간 계산
 
         // 태양 회전 위치 업데이트 (y축을 z축으로 변환, z축을 y축으로 변환)
@@ -62,7 +62,8 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
         
         // 태양의 고도에 따라 배경색 변화 (낮: 하얀색, 밤: 검은색으로 보간)
         const dayNightRatio = (1 - Math.cos(time * rotationSpeed)) / 2; // 0에서 1 사이로 주기적으로 변화
-        currentBackgroundColor.lerpColors(dayColor, nightColor, dayNightRatio)
+        currentBackgroundColor.lerpColors(dayColor, nightColor, dayNightRatio);
+        
         // currentBackgroundColor.lerpColors(nightColor, dayColor, dayNightRatio * 0.05); // 천천히 밤에서 낮으로 색상 보간
         scene.background = currentBackgroundColor;
 
