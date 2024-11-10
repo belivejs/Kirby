@@ -111,6 +111,15 @@ class Kirby{
 
     //걷기 애니메이션 처리
     _processAnimation(){
+
+        // 랜덤 더러워지기 (걸을때마다 1% 확률)
+        const randomNumber = Math.floor(Math.random() * 100);
+        if (randomNumber === 0) {
+            this.setupTexture('dirty');
+            // 행복도 낮추기
+
+        }
+
         const previousAnimationAction = this._currentAnimationAction;
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]){
             this._currentAnimationAction = this._animationMap["walk"];   
@@ -210,22 +219,20 @@ class Kirby{
     }
 
     //버튼으로 텍스쳐 변경
-    setupTexture(){
-        document.getElementById('dirty').onclick = () => {  
+    setupTexture(name){
+        if(name == 'dirty') {  
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_dirty.jpg")
             this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_dirty.jpg")
-        }
-        document.getElementById('angry').onclick = () => {
+        } else if(name == 'angry'){
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_angry.jpg")
             this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_angry.jpg")
-        }
-        document.getElementById('sleeping').onclick = () => {
+        } else if(name == 'sleeping') {
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_sleeping.jpg")
             this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_sleeping.jpg")
-        }
-        document.getElementById('base').onclick = () => {
+        } else if(name == 'base'){
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")        }
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+        }
     }
 
     //몸 텍스쳐 바꾸기
@@ -453,7 +460,7 @@ class Kirby{
                 this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
                 this._bubbleModel.visible = false;
                 this._bubbleAnimationMap['bubble'].stop();
-
+                this.setupTexture('base');
                 this.moveKirby()
                 this.changeAnimation(null);
             } else if (name == 'bed'){
@@ -465,6 +472,7 @@ class Kirby{
                     this._collisionFurniture.position.z,
                 );
                 await this.changeAnimation("sleep");
+                this.setupTexture('base');
                 this.moveKirby()
                 this.changeAnimation(null);
 
