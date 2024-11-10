@@ -7,11 +7,13 @@ import House from './house';
 
 
 class Kirby{
-    constructor(scene, renderer, camera, orbitControls){
+    constructor(scene, renderer, camera, orbitControls, controlProgressBar, updateProgressBar){
         this._scene = scene;
         this._renderer = renderer;
         this._camera = camera;
         this._controls = orbitControls;
+        this._controlProgressBar = controlProgressBar;
+        this._updateProgressBar = updateProgressBar;
 
         this._setupModel();
         this._setupBubbleModel();
@@ -169,6 +171,11 @@ class Kirby{
 
             //실행
             this.smoothChange(previousAnimationAction)
+
+            // work 애니메이션일 때 돈 업데이트
+            if (animationName === "work") {
+                this.updateMoney(10000); // 10000원 추가
+            }
 
             //두번째 애니메이션
             if(nextAnimation){
@@ -424,6 +431,8 @@ class Kirby{
             
             console.log(this._collisionFurniture.position);
             if(name == 'bath'){
+                this._controlProgressBar(5);
+
                 this._model.position.set(
                     this._collisionFurniture.position.x,
                     3,
@@ -445,6 +454,8 @@ class Kirby{
                 this.moveKirby()
                 this.changeAnimation(null);
             } else if (name == 'bed'){
+                this._controlProgressBar(5);
+
                 this._model.position.set(
                     this._collisionFurniture.position.x,
                     this._collisionFurniture.position.y/2,
@@ -455,6 +466,7 @@ class Kirby{
                 this.changeAnimation(null);
 
             } else if (name == 'chair'){
+
                 this._model.position.set(
                     this._collisionFurniture.position.x,
                     this._collisionFurniture.position.y/1.5,
@@ -526,6 +538,14 @@ class Kirby{
         this.update(time);
 
         requestAnimationFrame(this.render.bind(this));
+    }
+
+    updateMoney(amount) {
+        // 현재 저장된 돈을 불러옵니다.
+        let currentMoney = parseInt(localStorage.getItem('money')) || 0;
+        currentMoney += amount; // 돈 추가
+        localStorage.setItem('money', currentMoney); // 로컬 스토리지에 저장
+        console.log(`Updated Money: ${currentMoney}원`); // 콘솔로 확인
     }
 
 }
