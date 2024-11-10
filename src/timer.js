@@ -10,6 +10,7 @@ import * as THREE from 'three';
  * @param {THREE.Mesh} moonMesh : 달 오브젝트에 사용되는 mesh
  * @param {any} target : 태양/달이 돌아가는 고정 오브젝트, 카메라가 될 수도 있고 커비가 될 수도 있고 월드가 될 수도 있음.
  */
+
 export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, target, scene) {
     let rotationSpeed = (2 * Math.PI) / ticks; // 하루를 ticks만큼에 한 바퀴 회전
     let startTime = Date.now();
