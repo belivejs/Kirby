@@ -15,6 +15,9 @@ class Kirby{
         this._controlProgressBar = controlProgressBar;
         this._updateProgressBar = updateProgressBar;
 
+        this.hasSlept = false; // sleep 상태 여부
+        this.isDirty = false;  // dirty 상태 여부
+
         this._setupModel();
         this._setupBubbleModel();
         this._setupControl();
@@ -54,6 +57,8 @@ class Kirby{
 
             this.setupAnimations();
             this.setupTexture();
+            this.initiateRandomSleep();
+            this.initiateRandomDirty();
         })
     }
 
@@ -425,7 +430,12 @@ class Kirby{
             
             console.log(this._collisionFurniture.position);
             if(name == 'bath'){
-                this._controlProgressBar(5);
+                if(this.isDirty) {
+                    this._controlProgressBar(5);
+                    this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+                    this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+                    this.isDirty = false;
+                }
 
                 this._model.position.set(
                     this._collisionFurniture.position.x,
@@ -440,15 +450,19 @@ class Kirby{
                 this._bubbleModel.visible = true;
                 this._bubbleAnimationMap['bubble'].play();
                 await this.changeAnimation("cleaning");
-                this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+
                 this._bubbleModel.visible = false;
                 this._bubbleAnimationMap['bubble'].stop();
 
                 this.moveKirby()
                 this.changeAnimation(null);
             } else if (name == 'bed'){
-                this._controlProgressBar(5);
+                if(this.hasSlept) {
+                    this._controlProgressBar(5);
+                    this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
+                    this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
+                    this.hasSlept = false;
+                }
 
                 this._model.position.set(
                     this._collisionFurniture.position.x,
@@ -456,6 +470,9 @@ class Kirby{
                     this._collisionFurniture.position.z,
                 );
                 await this.changeAnimation("sleep");
+
+                
+
                 this.moveKirby()
                 this.changeAnimation(null);
 
@@ -556,17 +573,44 @@ class Kirby{
         }
     
         // 행복도 수치가 20 이하일 때 텍스처 변경
-        if (currentProgress <= 20) {
+        if (currentProgress <= 20 && !this.isDirty && !this.hasSlept) {
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_angry.jpg");
             this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_angry.jpg");
         }
 
-        else {
+        else if(currentProgress > 20 && !this.isDirty && !this.hasSlept) {
             this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg");
             this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg");
         }
     }
 
+    // 30초마다 무작위로 Kirby를 sleep 상태로 변경
+    initiateRandomSleep() {
+        var random = Math.floor(Math.random() *  1000);
+        setInterval(() => {
+            if (this._model && !this.hasSlept) {  
+                this.hasSlept = true;
+                this._controlProgressBar(-5);
+                console.log("Changing Kirby to sleep texture.");
+                this.changeBobyTexture(this._model, "texture/kirby/Kirby_sleeping.jpg");
+                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_sleeping.jpg");
+            }
+        }, random*100); 
+    }
+
+    // 30초마다 무작위로 Kirby를 sleep 상태로 변경
+    initiateRandomDirty() {
+        var random = Math.floor(Math.random() *  1000);
+        setInterval(() => {
+            if (this._model && !this.hasSlept && !this.isDirty) {  
+                this.isDirty = true;
+                this._controlProgressBar(-5);
+                console.log("Changing Kirby to dirty texture.");
+                this.changeBobyTexture(this._model, "texture/kirby/Kirby_dirty.jpg");
+                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_dirty.jpg");
+            }
+        }, random*100); 
+    }
 }
 
 export default Kirby;
