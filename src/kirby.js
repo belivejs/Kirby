@@ -545,6 +545,28 @@ class Kirby{
         console.log(`Updated Money: ${currentMoney}원`); // 콘솔로 확인
     }
 
+    // 행복도 업데이트 및 텍스처 변경 로직 추가
+    checkProgress() {
+        let currentProgress = parseInt(sessionStorage.getItem("progressBar"));
+        console.log("확인중 : ", currentProgress);
+
+        if (!this._model) {
+            console.warn("Kirby 모델이 아직 로드되지 않았습니다.");
+            return;
+        }
+    
+        // 행복도 수치가 20 이하일 때 텍스처 변경
+        if (currentProgress <= 20) {
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_angry.jpg");
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_angry.jpg");
+        }
+
+        else {
+            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg");
+            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg");
+        }
+    }
+
 }
 
 export default Kirby;

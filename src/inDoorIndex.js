@@ -23,6 +23,7 @@ let updatePositions; // 회전 로직을 저장하는 변수
 let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 var progressBar;
+let kirbyInstance;
 progressBar = document.getElementById("progressBar");
 
 function checkAndInitializeStorage() {
@@ -129,7 +130,7 @@ function init(){
     house.init();
     initializeProgressBar();
 
-    new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);    
+    kirbyInstance = new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);    
 
 
     requestAnimationFrame(animate);
@@ -250,6 +251,9 @@ function furnitureUI() {
             listItem.style.justifyContent = 'space-between';
             listItem.style.alignItems = 'center';
 
+            // 숫자를 떼어낸 기본 이름 추출
+            const furnitureBaseName = item.name.replace(/\d+$/, '');
+
             const itemName = document.createElement('a');
             itemName.href = '#';
             itemName.textContent = item.name;
@@ -269,7 +273,7 @@ function furnitureUI() {
             // 가구 클릭 시 scene에 추가
             itemName.addEventListener('click', function() {
                 if (!furnitureInstance) {
-                    furnitureInstance = new Furniture(scene, item.modelPath, item.name);
+                    furnitureInstance = new Furniture(scene, item.modelPath, furnitureBaseName); // 숫자 제거한 이름으로 생성
                     furnitureInstance.add(); // scene에 가구 추가
                     itemName.style.color = 'red'; // 추가 후 빨간색으로 변경
                 }
@@ -290,6 +294,7 @@ function furnitureUI() {
         });
     });
 }
+
 
 
 
@@ -415,6 +420,11 @@ function controlProgressBar(changeValue) {
     currentProgress = Math.min(100, Math.max(0, currentProgress + changeValue)); // 제한 범위 설정
     updateProgressBar(currentProgress);
     console.log(currentProgress);
+
+
+    if(kirbyInstance) {
+        kirbyInstance.checkProgress(); // Check progress and update textures if necessary
+    }
 
     // 성공 메시지
     if (currentProgress >= 100 && !isFinish) {

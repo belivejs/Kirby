@@ -362,6 +362,7 @@ function controlProgressBar(changeValue) {
     updateProgressBar(currentProgress);
     console.log(currentProgress);
 
+
     // 성공 메시지
     if (currentProgress >= 100 && !isFinish) {
         isFinish = true;
