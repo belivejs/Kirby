@@ -12,17 +12,17 @@ import { select } from 'three/webgpu';
 
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import {initializeTimer} from './timer.js';
+
 var loader = new GLTFLoader(); // 3D data loader
 
 
 var raycaster;
 var mouse;
-
+let intervalId;
 let updatePositions; // 회전 로직을 저장하는 변수
 let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 var progressBar;
-let progress = 30;
 progressBar = document.getElementById("progressBar");
 
 function checkAndInitializeStorage() {
@@ -33,6 +33,10 @@ function checkAndInitializeStorage() {
         localStorage.setItem("purchasedFurniture", JSON.stringify([])); // 구매한 가구를 빈 배열로 초기화
         localStorage.setItem("isInitialized", true); // 초기화 여부 저장
         console.log("프로젝트 초기화 완료");
+        localStorage.setItem("progressBar", 30); // Default progress value
+        localStorage.setItem("isFinish", "false"); // Reset finish status
+        isFinish = false; // Reset in-memory finish status
+        updateProgressBar(30); // Reset progress bar visually
     }
 }
 
@@ -121,6 +125,7 @@ function init(){
     // 집
     const house = new House(scene, 300, 250);
     house.init();
+    initializeProgressBar();
 
     new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);    
 
@@ -209,33 +214,56 @@ function chooseFurniture(){
 // const furnitureInstance = new Furniture(scene, furniture, furnitureName);
 // furnitureInstance.add();
 
-// 가구 로드
 function furnitureUI() {
     document.getElementById('menu-toggle').addEventListener('click', function(e) {
         e.preventDefault();
         const sidebar = document.getElementById('sidebar');
-        if (sidebar.style.display === 'none') {
-            sidebar.style.display = 'block';
-        } else {
-            sidebar.style.display = 'none';
-        }
+        sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
     });
 
     document.addEventListener('DOMContentLoaded', function() {
         const furnitureList = document.getElementById('furniture-list');
         furnitureList.innerHTML = '';
 
-        // 로컬 스토리지에서 구매한 가구 리스트 불러오기
         const purchasedFurniture = JSON.parse(localStorage.getItem('purchasedFurniture')) || [];
 
         purchasedFurniture.forEach(item => {
             const listItem = document.createElement('li');
-            listItem.innerHTML = `<a href="#">${item.name}</a>`;
+            listItem.style.display = 'flex';
+            listItem.style.justifyContent = 'space-between';
+            listItem.style.alignItems = 'center';
+
+            const itemName = document.createElement('a');
+            itemName.href = '#';
+            itemName.textContent = item.name;
+            listItem.appendChild(itemName);
+
+            // del 버튼 생성
+            const delButton = document.createElement('button');
+            delButton.textContent = 'del';
+            delButton.style.marginLeft = 'auto';
+
+            let furnitureInstance = new Furniture(scene, item.modelPath, item.name);
+            furnitureInstance.add();
+
+            // del 버튼 클릭 시 가구 숨기기
+            delButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (furnitureInstance) {
+                    furnitureInstance.hide(); // scene에서 가구 숨기기
+                    furnitureInstance = null; // 인스턴스 제거
+                }
+            });
+
+            listItem.appendChild(delButton);
             furnitureList.appendChild(listItem);
 
-            listItem.addEventListener('click', function() {
-                const furnitureInstance = new Furniture(scene, item.modelPath, item.name);
-                furnitureInstance.add();
+            // 아이템 클릭 시 새로운 인스턴스를 만들어 추가
+            itemName.addEventListener('click', function() {
+                if (!furnitureInstance) { // 인스턴스가 없는 경우에만 추가
+                    furnitureInstance = new Furniture(scene, item.modelPath, item.name);
+                    furnitureInstance.add();
+                }
             });
         });
     });
@@ -272,7 +300,7 @@ function initFurniture() {
                     chairInstance.add(false, 180);
                     break;
                 case 2:
-                    const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:16});
+                    const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:30});
                     bedInstance.add(false, 0);
                     break;
                 case 3:
@@ -346,31 +374,65 @@ function setColor(objectScene, color){
 
 
 
-function controlProgressBar(change_value) {
-    if((progress + change_value) <= 100 && (progress + change_value) >= 0) {
-        progress = progress + change_value;
-        updateProgressBar(progress);
-    }
+var isFinish = localStorage.getItem("isFinish") === "true" || false; // 로컬스토리지에서 완료 여부 가져오기
 
-    else if ((progress + change_value) < 0)
-        updateProgressBar(0);
-
-    else if ((progress + change_value) > 100)
-        updateProgressBar(100);
+// Initialize progressBar with value from localStorage or default to 30%
+function initializeProgressBar() {
+    const savedProgress = localStorage.getItem("progressBar");
+    const initialProgress = savedProgress !== null ? parseInt(savedProgress) : 30; // 기본값을 30%로 설정
+    updateProgressBar(initialProgress);
 }
 
+// Update progressBar and save to localStorage
 function updateProgressBar(value) {
     progressBar.style.width = `${value}%`;
     progressBar.textContent = `${value}%`;
+    localStorage.setItem("progressBar", value); // Save to localStorage
 }
 
-checkAndInitializeStorage();
 
+// Function to control progress and display messages if 100% or 0%
+function controlProgressBar(changeValue) {
+    let currentProgress = parseInt(localStorage.getItem("progressBar"));
+    currentProgress = Math.min(100, Math.max(0, currentProgress + changeValue)); // 제한 범위 설정
+    updateProgressBar(currentProgress);
+    console.log(currentProgress);
+
+    // 성공 메시지
+    if (currentProgress >= 100 && !isFinish) {
+        isFinish = true;
+        localStorage.setItem("isFinish", "true");
+        showOverlayMessage("complete-text");
+        console.log("complete");
+        clearInterval(intervalId); // 0%에 도달하면 반복 중지
+    }
+    // 실패 메시지
+    else if (currentProgress <= 0 && !isFinish) {
+        isFinish = true;
+        localStorage.setItem("isFinish", "true");
+        showOverlayMessage("fail-text");
+        clearInterval(intervalId); // 0%에 도달하면 반복 중지
+    }
+}
+
+// Function to display overlay message
+function showOverlayMessage(messageId) {
+    console.log(messageId);
+    const overlay = document.getElementById("overlay");
+    overlay.style.display = "flex";
+    document.getElementById(messageId).style.display = "block";
+}
+
+
+// Initialize progressBar at the very beginning
+initializeProgressBar();
+checkAndInitializeStorage();
 init();
 furnitureUI();
 chooseFurniture();
 initFurniture();
-var trash = new Trash(scene, 1000, 5);
+var trash = new Trash(scene, 1000, 5, controlProgressBar, updateProgressBar);
 trash.randomTrash();
 animate();
-setInterval(() => controlProgressBar(3), 1000);
+// Progress가 계속 증가하는 interval 설정
+intervalId = setInterval(() => controlProgressBar(3), 10000);

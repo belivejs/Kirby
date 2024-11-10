@@ -172,11 +172,6 @@ class Kirby{
             //실행
             this.smoothChange(previousAnimationAction)
 
-            // work 애니메이션일 때 돈 업데이트
-            if (animationName === "work") {
-                this.updateMoney(10000); // 10000원 추가
-            }
-
             //두번째 애니메이션
             if(nextAnimation){
                 previousAnimationAction = this._currentAnimationAction;
@@ -466,6 +461,9 @@ class Kirby{
 
             } else if (name == 'chair'){
 
+                this.updateMoney(2000); 
+                this._controlProgressBar(-5);
+
                 this._model.position.set(
                     this._collisionFurniture.position.x,
                     this._collisionFurniture.position.y/1.5,
@@ -484,7 +482,7 @@ class Kirby{
                 Trash.downCount();
 
                 // 행복도 증가
-                
+                this._controlProgressBar(5);
             }
             //키보드 이벤트 다시 세팅
             document.addEventListener('keydown', this.keydownEvent);

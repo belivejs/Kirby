@@ -5,11 +5,13 @@ class Trash {
 
     static currentTrashCount = 0;
 
-    constructor(scene, interval, max) {
+    constructor(scene, interval, max, controlProgressBar, updateProgressBar) {
         this.scene = scene;
         this.interval = interval;
         this.max = max;
         this.path = "./models/essential/trash/trash/scene.gltf";
+        this._controlProgressBar = controlProgressBar;
+        this._updateProgressBar = updateProgressBar;
     }
 
     randomTrash() {
@@ -21,6 +23,7 @@ class Trash {
                 const trash = new Furniture(this.scene, this.path, "trash", {x:randomX, y:0, z:randomZ});
                 trash.add(false);
                 Trash.currentTrashCount++;
+                this._controlProgressBar(-5);
             }
         }, this.interval);
     }

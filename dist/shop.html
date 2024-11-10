@@ -139,16 +139,24 @@
             localStorage.setItem('money', money); // 업데이트된 돈을 저장
             updateMoneyDisplay(); // 업데이트된 돈 표시
             alert(`Complete! Price ${cost} was deducted`);
-            
+        
             // 로컬 스토리지에 구매한 가구 저장
             let purchasedFurniture = JSON.parse(localStorage.getItem('purchasedFurniture')) || [];
             purchasedFurniture.push({ name, cost, modelPath });
             localStorage.setItem('purchasedFurniture', JSON.stringify(purchasedFurniture));
+
+            // 구매 버튼을 즉시 "Bought"로 변경하고 비활성화
+            const buyButton = document.querySelector(`button[onclick="buyItem('${name}', ${cost}, '${modelPath}')"]`);
+            if (buyButton) {
+                buyButton.textContent = 'Bought';
+                buyButton.disabled = true;
+                buyButton.classList.remove('buyButton');
+                buyButton.classList.add('boughtButton');
+            }
         } else {
             alert("You don't have enough money");
         }
     }
-
         function goBack() {
             window.location.href = 'inDoor_Index.html';
         }

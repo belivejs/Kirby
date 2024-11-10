@@ -17,6 +17,12 @@ class Furniture {
         this.scale = { x: 0.7, y: 0.7, z: 0.7 };
     }
 
+    hide() {
+        if(this.model) {
+            this.model.visible = false;
+        }
+    }
+
 
     add(ifSelect=true, rotate=0) {
         const loader = new GLTFLoader();
