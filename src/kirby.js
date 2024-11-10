@@ -414,6 +414,7 @@ class Kirby{
     async collisionAction(){
         const name = Furniture.getFurnitureName(this._collisionFurniture);
         if (name != "desk") {//책상 부딪혔을떈 애니메이션 x
+            console.log(Furniture.getFurnitureName(Furniture.currentFurniture));
             this._doAction = true;
             this._speed = 0;
             document.removeEventListener('keydown', this.keydownEvent);
@@ -469,7 +470,7 @@ class Kirby{
                 this._collisionFurniture.position.z = 9999;
 
                 // 쓰레기 현재 쓰레기 갯수 감소
-                Trash.downCount();
+                Trash.downCount(this._collisionFurniture);
 
                 // 행복도 증가
                 
@@ -486,8 +487,8 @@ class Kirby{
         const size = new THREE.Vector3();
         box.getSize(size);
 
-        const moveX = size.x * 1.5;
-        const moveZ = size.z * 1.5;
+        const moveX = size.x * 1;
+        const moveZ = size.z * 1;
         
         //캐릭터 이동
         if(this._model.position.x >= 0 && this._model.position.x < House.groundWidth/2 && this._model.position.z <= House.groundLength/2){

@@ -156,6 +156,13 @@ function chooseFurniture(){
                     return;
                 }
 
+                // 쓰레기 선택 예외
+                if(Furniture.getFurnitureName(selectedFurniture) == 'trash'){
+                    selectedFurniture = null;
+                    Furniture.selected(selectedFurniture);
+                    return;
+                }
+
                 Furniture.selected(selectedFurniture);
             }
         }
@@ -181,8 +188,8 @@ function chooseFurniture(){
 
                 if (Furniture.currentFurniture) {
                     // Furniture.currentFurniture.model.position.set(Math.floor(intersectPoint.x / 10) * 10, Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z / 10) * 10);
+                    Furniture.currentFurniture.position = {x: Math.floor(intersectPoint.x), y: Furniture.currentFurniture.model.position.y, z: Math.floor(intersectPoint.z)};
                     Furniture.currentFurniture.model.position.set(Math.floor(intersectPoint.x), Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z));
-                    console.log(`현재 좌표: x:${Furniture.currentFurniture.model.position.x}, y:${Furniture.currentFurniture.model.position.y}, z:${Furniture.currentFurniture.model.position.z}`);
                 }
             }
         }
@@ -206,31 +213,53 @@ document.addEventListener('keydown', (e) => {
 
 
 function initFurniture() {
+    // 저장된 가구 있는지 확인 및 로드
+    const furnitureData = localStorage.getItem('furniture');
+    if (furnitureData) {
+        console.log("가구 로드");
+        const furniture_list = JSON.parse(furnitureData);
+        
+        for (const element of furniture_list) {
+            const furnitureInstance = new Furniture(
+                scene,
+                element.path,
+                element.furnitureName,
+                element.position,
+                element.ifSelect,
+                element.rotateDeg,
+                element.scaleY
+            );
+            furnitureInstance.add();
+        }
+        return
+    }
+    console.log("가구 로드 안됌.");
+    // 저장된 가구 없을 경우
     const furnitureArray = [
         './models/essential/desk/desk2/scene.gltf',
         './models/essential/chair/chair1/scene.gltf',
         './models/essential/bed/bed1/scene.gltf',
-        './models/essential/bath/bath3/scene.gltf',
+        './models/essential/bath/bath2/scene.gltf',
     ];
 
     for (let i = 0; i < furnitureArray.length; i++) {
         try{
             switch (i) {
                 case 0:
-                    const deskInstance = new Furniture(scene, furnitureArray[i], "desk", {x:17, y:2.5041244718755564, z:9});
-                    deskInstance.add(false, 90);
+                    const deskInstance = new Furniture(scene, furnitureArray[i], "desk", {x:17, y:2.5041244718755564, z:9}, false, 90);
+                    deskInstance.add();
                     break;
                 case 1:
-                    const chairInstance = new Furniture(scene, furnitureArray[i], 'chair', {x:22, y:12.500000000000012, z:21});
-                    chairInstance.add(false, 180);
+                    const chairInstance = new Furniture(scene, furnitureArray[i], 'chair', {x:22, y:12.500000000000012, z:21}, false, 180);
+                    chairInstance.add();
                     break;
                 case 2:
-                    const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:16});
-                    bedInstance.add(false, 0);
+                    const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:16}, false, 0);
+                    bedInstance.add();
                     break;
                 case 3:
-                    const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 2, y: 3.332235320347188, z: 79});
-                    bathInstance.add(false, 0);
+                    const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 18, y: 0, z: 150}, false, 0);
+                    bathInstance.add();
                     break;
                 default:
                     console.error('알 수 없는 가구 인덱스입니다.');
@@ -239,6 +268,7 @@ function initFurniture() {
             console.log(e)
         }
     }
+    Furniture.saveToLocalStorage();
 }
 
 // 애니메이션 루프
@@ -296,6 +326,12 @@ function setColor(objectScene, color){
     scene.add(objectScene);
 
 }
+
+window.addEventListener("beforeunload", function() {
+    Furniture.saveToLocalStorage();
+    Trash.saveTrashCount();    
+});
+
 
 init();
 chooseFurniture();
