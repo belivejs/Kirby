@@ -11,9 +11,29 @@
             height: 100%;
             background-color: white;
         }
-        #sidebar h2, #sidebar ul {
-            background-color: #f0f0f0;
-            z-index: 9999;
+        
+        #sidebar {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            width: 200px;
+            height: 300px; /* 원하는 높이 설정 */
+            background-color: white;
+            overflow-y: auto; /* 스크롤 활성화 */
+        }
+        #sidebar h2 {
+            margin: 0;
+            padding: 10px;
+            background-color: white;
+        }
+        #furniture-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #furniture-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
         
 
@@ -169,7 +189,7 @@
         <div id="particles"></div>
     </div>
     <div id="menu" style="position: absolute; top: 10px; right: 10px;">
-        <div id="sidebar" style="position: absolute; top: 24px; right: 0; width: 250px; height: 100%; display: none;">
+        <div id="sidebar">
             <h2 style="background-color: #f0f0f0;">가구 선택</h2>
             <ul id="furniture-list">
                 

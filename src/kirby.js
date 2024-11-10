@@ -539,9 +539,9 @@ class Kirby{
 
     updateMoney(amount) {
         // 현재 저장된 돈을 불러옵니다.
-        let currentMoney = parseInt(localStorage.getItem('money')) || 0;
+        let currentMoney = parseInt(sessionStorage.getItem('money')) || 0;
         currentMoney += amount; // 돈 추가
-        localStorage.setItem('money', currentMoney); // 로컬 스토리지에 저장
+        sessionStorage.setItem('money', currentMoney); // 로컬 스토리지에 저장
         console.log(`Updated Money: ${currentMoney}원`); // 콘솔로 확인
     }
 

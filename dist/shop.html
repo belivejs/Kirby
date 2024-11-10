@@ -25,7 +25,12 @@
             border-radius: 5px;
             box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
         }
-        #backButton {
+        .navigation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .navButton {
             padding: 10px 20px;
             font-size: 16px;
             background-color: #4caf50;
@@ -33,7 +38,6 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
         }
         .table {
             display: grid;
@@ -51,7 +55,7 @@
             font-size: 16px;
         }
         .cell img {
-            width: 150px; /* 이미지 크기 조정 */
+            width: 150px;
             height: auto;
             margin-right: 30px;
         }
@@ -82,37 +86,38 @@
 <body>
     <div id="moneyDisplay"></div>
     <div id="productTable" class="table"></div>
-    <button id="backButton" onclick="goBack()">Go home</button>
+    <div class="navigation-buttons">
+        <button class="navButton" onclick="goIndoor()">Go Indoor</button>
+        <button class="navButton" onclick="goOutdoor()">Go Outdoor</button>
+    </div>
 
     <script>
-        // 초기 돈 설정을 로컬 스토리지에서 불러오거나 기본값 10000으로 설정
-        let money = parseInt(localStorage.getItem('money')) || 2000;
+        let money = parseInt(sessionStorage.getItem('money')) || 2000;
         document.getElementById('moneyDisplay').textContent = `Your money : ${money}`;
 
         const furnitureItems = [
-            { name: "bed1", price: 2000, image: "furniture_image/bed4.jpg", modelPath: "models/models/essential/bed/bed4/scene.gltf" },
-            { name: "bed2", price: 1500, image: "furniture_image/bed2.jpg", modelPath: "models/essential/bed/bed2/scene.gltf"  },
-            { name: "bed3", price: 1000, image: "furniture_image/bed3.jpg", modelPath: "models/essential/bed/bed3/scene.gltf"  },
-            { name: "desk1", price: 300, image: "furniture_image/desk1.png", modelPath: "models/essential/desk/desk1/scene.gltf"  },
-            { name: "desk2", price: 1200, image: "furniture_image/desk4.png", modelPath: "models/essential/desk/desk4/scene.gltf"  },
-            { name: "desk3", price: 100, image: "furniture_image/desk3.png", modelPath: "models/essential/desk/desk3/scene.gltf"  },
-            { name: "chair1", price: 600, image: "furniture_image/chair4.jpg", modelPath: "models/essential/chair/chair4/scene.gltf"  },
-            { name: "chair2", price: 400, image: "furniture_image/chair2.png", modelPath: "models/essential/chair/chair2/scene.gltf"  },
-            { name: "chair3", price: 500, image: "furniture_image/chair3.jpg", modelPath: "models/essential/chair/chair3/scene.gltf"  },
-            { name: "bath1", price: 900, image: "furniture_image/bath1.jpg", modelPath: "models/essential/bath/bath1/scene.gltf"  },
-            { name: "bath2", price: 2500, image: "furniture_image/bath4.jpg", modelPath: "models/essential/bath/bath4/scene.gltf"  },
-            { name: "bath3", price: 700, image: "furniture_image/bath3.jpg", modelPath: "models/essential/bath/bath3/scene.gltf"  },
+            { name: "bed1", price: 4000, image: "furniture_image/bed4.jpg", modelPath: "models/models/essential/bed/bed4/scene.gltf" },
+            { name: "bed2", price: 3000, image: "furniture_image/bed2.jpg", modelPath: "models/essential/bed/bed2/scene.gltf"  },
+            { name: "bed3", price: 1500, image: "furniture_image/bed3.jpg", modelPath: "models/essential/bed/bed3/scene.gltf"  },
+            { name: "desk1", price: 1000, image: "furniture_image/desk1.png", modelPath: "models/essential/desk/desk1/scene.gltf"  },
+            { name: "desk2", price: 1500, image: "furniture_image/desk4.png", modelPath: "models/essential/desk/desk4/scene.gltf"  },
+            { name: "desk3", price: 500, image: "furniture_image/desk3.png", modelPath: "models/essential/desk/desk3/scene.gltf"  },
+            { name: "chair1", price: 2000, image: "furniture_image/chair4.jpg", modelPath: "models/essential/chair/chair4/scene.gltf"  },
+            { name: "chair2", price: 1800, image: "furniture_image/chair2.png", modelPath: "models/essential/chair/chair2/scene.gltf"  },
+            { name: "chair3", price: 1000, image: "furniture_image/chair3.jpg", modelPath: "models/essential/chair/chair3/scene.gltf"  },
+            { name: "bath1", price: 2900, image: "furniture_image/bath1.jpg", modelPath: "models/essential/bath/bath1/scene.gltf"  },
+            { name: "bath2", price: 3500, image: "furniture_image/bath2.jpg", modelPath: "models/essential/bath/bath2/scene.gltf"  },
+            { name: "bath3", price: 3700, image: "furniture_image/bath4.jpg", modelPath: "models/essential/bath/bath4/scene.gltf"  },
         ];
 
         function createProductTable() {
             const productTable = document.getElementById('productTable');
-            const purchasedFurniture = JSON.parse(localStorage.getItem('purchasedFurniture')) || [];
+            const purchasedFurniture = JSON.parse(sessionStorage.getItem('purchasedFurniture')) || [];
 
             furnitureItems.forEach(item => {
                 const cell = document.createElement('div');
                 cell.classList.add('cell');
 
-                // 구매 여부 확인
                 const isBought = purchasedFurniture.some(p => p.name === item.name);
 
                 cell.innerHTML = `
@@ -127,38 +132,40 @@
             });
         }
 
-        // 돈 업데이트 함수
         function updateMoneyDisplay() {
-            money = parseInt(localStorage.getItem('money')) || 2000;
+            money = parseInt(sessionStorage.getItem('money')) || 2000;
             document.getElementById('moneyDisplay').textContent = `Your money : ${money}원`;
         }
 
         function buyItem(name, cost, modelPath) {
-        if (money >= cost) {
-            money -= cost;
-            localStorage.setItem('money', money); // 업데이트된 돈을 저장
-            updateMoneyDisplay(); // 업데이트된 돈 표시
-            alert(`Complete! Price ${cost} was deducted`);
-        
-            // 로컬 스토리지에 구매한 가구 저장
-            let purchasedFurniture = JSON.parse(localStorage.getItem('purchasedFurniture')) || [];
-            purchasedFurniture.push({ name, cost, modelPath });
-            localStorage.setItem('purchasedFurniture', JSON.stringify(purchasedFurniture));
+            if (money >= cost) {
+                money -= cost;
+                sessionStorage.setItem('money', money);
+                updateMoneyDisplay();
+                alert(`Complete! Price ${cost} was deducted`);
+                
+                let purchasedFurniture = JSON.parse(sessionStorage.getItem('purchasedFurniture')) || [];
+                purchasedFurniture.push({ name, cost, modelPath });
+                sessionStorage.setItem('purchasedFurniture', JSON.stringify(purchasedFurniture));
 
-            // 구매 버튼을 즉시 "Bought"로 변경하고 비활성화
-            const buyButton = document.querySelector(`button[onclick="buyItem('${name}', ${cost}, '${modelPath}')"]`);
-            if (buyButton) {
-                buyButton.textContent = 'Bought';
-                buyButton.disabled = true;
-                buyButton.classList.remove('buyButton');
-                buyButton.classList.add('boughtButton');
+                const buyButton = document.querySelector(`button[onclick="buyItem('${name}', ${cost}, '${modelPath}')"]`);
+                if (buyButton) {
+                    buyButton.textContent = 'Bought';
+                    buyButton.disabled = true;
+                    buyButton.classList.remove('buyButton');
+                    buyButton.classList.add('boughtButton');
+                }
+            } else {
+                alert("You don't have enough money");
             }
-        } else {
-            alert("You don't have enough money");
         }
-    }
-        function goBack() {
+
+        function goIndoor() {
             window.location.href = 'inDoor_Index.html';
+        }
+
+        function goOutdoor() {
+            window.location.href = 'outDoor_Index.html';
         }
 
         createProductTable();

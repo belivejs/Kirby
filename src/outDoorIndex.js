@@ -37,14 +37,16 @@ progressBar = document.getElementById("progressBar");
 
 function checkAndInitializeStorage() {
     // "isInitialized"라는 키가 없으면 새로 시작한 것이므로 초기화 진행
-    if (!localStorage.getItem("isInitialized")) {
+    if (!sessionStorage.getItem("isInitialized")) {
+        sessionStorage.clear();
+
         // 초기 설정
-        localStorage.setItem("money", 0); // 돈을 10000원으로 초기화
-        localStorage.setItem("purchasedFurniture", JSON.stringify([])); // 구매한 가구를 빈 배열로 초기화
-        localStorage.setItem("isInitialized", true); // 초기화 여부 저장
+        sessionStorage.setItem("money", 0); // 돈을 10000원으로 초기화
+        sessionStorage.setItem("purchasedFurniture", JSON.stringify([])); // 구매한 가구를 빈 배열로 초기화
+        sessionStorage.setItem("isInitialized", true); // 초기화 여부 저장
         console.log("프로젝트 초기화 완료");
-        localStorage.setItem("progressBar", 30); // Default progress value
-        localStorage.setItem("isFinish", "false"); // Reset finish status
+        sessionStorage.setItem("progressBar", 30); // Default progress value
+        sessionStorage.setItem("isFinish", "false"); // Reset finish status
         isFinish = false; // Reset in-memory finish status
         updateProgressBar(30); // Reset progress bar visually
     }
@@ -336,26 +338,26 @@ function checkCollision(newPosition) {
 }
 
 
-var isFinish = localStorage.getItem("isFinish") === "true" || false; // 로컬스토리지에서 완료 여부 가져오기
+var isFinish = sessionStorage.getItem("isFinish") === "true" || false; // 로컬스토리지에서 완료 여부 가져오기
 
-// Initialize progressBar with value from localStorage or default to 30%
+// Initialize progressBar with value from sessionStorage or default to 30%
 function initializeProgressBar() {
-    const savedProgress = localStorage.getItem("progressBar");
+    const savedProgress = sessionStorage.getItem("progressBar");
     const initialProgress = savedProgress !== null ? parseInt(savedProgress) : 30; // 기본값을 30%로 설정
     updateProgressBar(initialProgress);
 }
 
-// Update progressBar and save to localStorage
+// Update progressBar and save to sessionStorage
 function updateProgressBar(value) {
     progressBar.style.width = `${value}%`;
     progressBar.textContent = `${value}%`;
-    localStorage.setItem("progressBar", value); // Save to localStorage
+    sessionStorage.setItem("progressBar", value); // Save to sessionStorage
 }
 
 
 // Function to control progress and display messages if 100% or 0%
 function controlProgressBar(changeValue) {
-    let currentProgress = parseInt(localStorage.getItem("progressBar"));
+    let currentProgress = parseInt(sessionStorage.getItem("progressBar"));
     currentProgress = Math.min(100, Math.max(0, currentProgress + changeValue)); // 제한 범위 설정
     updateProgressBar(currentProgress);
     console.log(currentProgress);
@@ -363,7 +365,7 @@ function controlProgressBar(changeValue) {
     // 성공 메시지
     if (currentProgress >= 100 && !isFinish) {
         isFinish = true;
-        localStorage.setItem("isFinish", "true");
+        sessionStorage.setItem("isFinish", "true");
         showOverlayMessage("complete-text");
         console.log("complete");
         clearInterval(intervalId); // 0%에 도달하면 반복 중지
@@ -371,7 +373,7 @@ function controlProgressBar(changeValue) {
     // 실패 메시지
     else if (currentProgress <= 0 && !isFinish) {
         isFinish = true;
-        localStorage.setItem("isFinish", "true");
+        sessionStorage.setItem("isFinish", "true");
         showOverlayMessage("fail-text");
         clearInterval(intervalId); // 0%에 도달하면 반복 중지
     }
@@ -390,4 +392,4 @@ checkAndInitializeStorage();
 initializeProgressBar();
 init();
 animate();
-intervalId = setInterval(() => controlProgressBar(3), 10000);
+intervalId = setInterval(() => controlProgressBar(3), 5000);
