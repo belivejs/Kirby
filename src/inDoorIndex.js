@@ -121,7 +121,7 @@ function init(){
     const house = new House(scene, 300, 250);
     house.init();
 
-    new Kirby(scene, renderer, camera, controls, controlProgressBar, updateProgressBar);    
+    new Kirby(scene, renderer, camera, controls, 0.15,controlProgressBar, updateProgressBar);    
 
 
     requestAnimationFrame(animate);
@@ -247,6 +247,7 @@ function furnitureUI() {
     });
 }
 
+// 
 document.addEventListener('keydown', (e) => {
     if (Furniture.currentFurniture) {
         if (e.key === 'e' || e.key === 'ㄷ') {

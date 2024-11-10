@@ -360,8 +360,8 @@ class Kirby{
             newPosition.set(this._model.position.x + moveX, this._model.position.y, this._model.position.z + moveZ)
             if(!this._doAction){//액션 없을 때
                 if(!this.checkCollision(newPosition)){
-                    if(newPosition.x <= House.groundWidth && newPosition.z <= House.groundLength){
-                        console.log("Movde!#!@$@!$!%$@!$@!");
+                    if(3 <= this._model.position.x && this._model.position.x <= 97
+                        && 4 <= this._model.position.z && this._model.position.z <= 97){
                         //캐릭터 이동
                         this._model.position.x += moveX;
                         this._model.position.y = 0;
@@ -375,6 +375,16 @@ class Kirby{
                             this._model.position.y,
                             this._model.position.z,
                         );     
+                    }
+                    else{ // 팬스 밖으로 못나가게 설정
+                        if(this._model.position.x < 3)
+                            this._model.position.x = 4;
+                        else if(this._model.position.x > 97)
+                            this._model.position.x = 96;
+                        else if(this._model.position.z < 4)
+                            this._model.position.z = 5;
+                        else if(this._model.position.z > 97)
+                            this._model.position.z = 96;
                     }
                 } else{ //부딪혔을때
                     this.collisionAction()
