@@ -27,7 +27,7 @@ let fenceClone3;
 let fenceClone4;
 let houseBox;
 const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
-let kirby;
+
 
 let grassGeometry;
 

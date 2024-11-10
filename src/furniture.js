@@ -23,8 +23,6 @@ class Furniture {
         Furniture.backupFurnitureList.push(this);
     }
 
-<<<<<<< HEAD
-=======
     hide() {
         if(this.model) {
             this.model.visible = false;
@@ -33,7 +31,7 @@ class Furniture {
 
 
     add(ifSelect=true, rotate=0) {
->>>>>>> Yejin
+
         const loader = new GLTFLoader();
         loader.load(this.path, (gltf) => {
             this.model = gltf.scene;
