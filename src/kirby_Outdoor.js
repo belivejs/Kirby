@@ -431,6 +431,17 @@ class Kirby{
             // 상자가 겹치는지 확인
             if (this._kirbyBox.intersectsBox(furnitureBox)) {
                 console.log('Kirby와 가구가 충돌했습니다!', Furniture.getFurnitureName(furnitureModel));
+                if (Furniture.getFurnitureName(furnitureModel) == "door") {
+
+                    document.removeEventListener('keydown', this.keydownEvent);
+                    document.removeEventListener('keyup', this.keyupEvent);
+                    this._pressedKeys = {}
+                    window.open('indoor_index.html', '_self'); // 외부 -> 내부 이동
+                    //키보드 이벤트 다시 세팅
+                    document.addEventListener('keydown', this.keydownEvent);
+                    document.addEventListener('keyup', this.keyupEvent);
+                }
+
                 const preCollision = this._collisionFurniture;
                 this._collisionFurniture = furnitureModel;
                 return true;
@@ -452,73 +463,12 @@ class Kirby{
     _doAction=false;
     async collisionAction(){
         const name = Furniture.getFurnitureName(this._collisionFurniture);
-        if (name != "desk") {//책상 부딪혔을떈 애니메이션 x
-            console.log(Furniture.getFurnitureName(Furniture.currentFurniture));
-            this._doAction = true;
-            this._speed = 0;
+        if (name == "door") {
+
             document.removeEventListener('keydown', this.keydownEvent);
             document.removeEventListener('keyup', this.keyupEvent);
             this._pressedKeys = {}
 
-            
-            console.log(this._collisionFurniture.position);
-            if(name == 'bath'){
-                this._controlProgressBar(5);
-
-                this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    3,
-                    this._collisionFurniture.position.z,
-                );
-                this._bubbleModel.position.set(
-                    this._collisionFurniture.position.x,
-                    12,
-                    this._collisionFurniture.position.z,
-                )
-                this._bubbleModel.visible = true;
-                this._bubbleAnimationMap['bubble'].play();
-                await this.changeAnimation("cleaning");
-                this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
-                this._bubbleModel.visible = false;
-                this._bubbleAnimationMap['bubble'].stop();
-
-                this.moveKirby()
-                this.changeAnimation(null);
-            } else if (name == 'bed'){
-                this._controlProgressBar(5);
-
-                this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    this._collisionFurniture.position.y/2,
-                    this._collisionFurniture.position.z,
-                );
-                await this.changeAnimation("sleep");
-                this.moveKirby()
-                this.changeAnimation(null);
-
-            } else if (name == 'chair'){
-
-                this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    this._collisionFurniture.position.y/1.5,
-                    this._collisionFurniture.position.z,
-                );
-                await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true);
-                this.moveKirby()
-                this.changeAnimation(null);
-            } else if (name == 'trash'){
-                // 없애기가 안되서 안보이는 좌표로 날려버림
-                this._collisionFurniture.position.x = 9999;
-                this._collisionFurniture.position.y = 9999;
-                this._collisionFurniture.position.z = 9999;
-
-                // 쓰레기 현재 쓰레기 갯수 감소
-                Trash.downCount(this._collisionFurniture);
-
-                // 행복도 증가
-                
-            }
             //키보드 이벤트 다시 세팅
             document.addEventListener('keydown', this.keydownEvent);
             document.addEventListener('keyup', this.keyupEvent);

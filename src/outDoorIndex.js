@@ -28,6 +28,8 @@ let houseBox;
 const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
 let kirby;
 
+let grassGeometry;
+
 //태양 달 효과
 let updatePositions; // 회전 로직을 저장하는 변수
 let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
@@ -88,6 +90,7 @@ function init(){
 
     addGrass();
     addFence();
+    addDoor();
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -174,7 +177,7 @@ function animate() {
 function addGrass() {
     // 잔디용 평면 지오메트리 생성
 
-    const grassGeometry = new THREE.PlaneGeometry(120, 120, 2); 
+    grassGeometry = new THREE.PlaneGeometry(120, 120, 2); 
 
     const textureLoader = new THREE.TextureLoader();
     const textureBaseColor = textureLoader.load('./texture/Stylized/Stylized_Stone_Floor_007_BaseColor.png');
@@ -310,6 +313,15 @@ function createParticle() {
     particle.addEventListener('animationend', () => {
         particle.remove();
     });
+}
+
+function addDoor(){
+    let doorPath = './models/essential/door/door/scene.gltf';
+    const doorInstance = new Furniture(scene, doorPath, 'door', {x:59, y:0, z: 55}, false, 0, 15);
+    doorInstance.add(false, () => {
+        doorInstance.model.visible = false;
+    });
+
 }
 
 init();

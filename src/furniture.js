@@ -23,7 +23,7 @@ class Furniture {
         Furniture.backupFurnitureList.push(this);
     }
 
-    add() {
+    add(ifscale=true, callback=null) {
         const loader = new GLTFLoader();
         loader.load(this.path, (gltf) => {
             this.model = gltf.scene;
@@ -39,10 +39,11 @@ class Furniture {
             this.model.scale.set(multiple, multiple, multiple);
 
             // 높이 조정
-            const modelBox = new THREE.Box3().setFromObject(this.model);
-            const modelBottomY = modelBox.min.y;
-            this.model.position.y += House.groundHeight - modelBottomY;
-
+            if(ifscale){
+                const modelBox = new THREE.Box3().setFromObject(this.model);
+                const modelBottomY = modelBox.min.y;
+                this.model.position.y += House.groundHeight - modelBottomY;
+            }
             Furniture.furnitureList.push(this);
             Furniture.furnitureModelList.push(this.model);
 
@@ -55,6 +56,9 @@ class Furniture {
             console.log("add전까지");
             this.scene.add(this.model);
             console.log("모델 : ", this.model);
+
+            if (callback) callback();
+            
         });
     }
 

@@ -204,6 +204,8 @@ function chooseFurniture(){
                     // Furniture.currentFurniture.model.position.set(Math.floor(intersectPoint.x / 10) * 10, Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z / 10) * 10);
                     Furniture.currentFurniture.position = {x: Math.floor(intersectPoint.x), y: Furniture.currentFurniture.model.position.y, z: Math.floor(intersectPoint.z)};
                     Furniture.currentFurniture.model.position.set(Math.floor(intersectPoint.x), Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z));
+
+                    console.log(Math.floor(intersectPoint.x), Furniture.currentFurniture.model.position.y, Math.floor(intersectPoint.z));
                 }
             }
         }
@@ -286,6 +288,7 @@ function initFurniture() {
         './models/essential/chair/chair1/scene.gltf',
         './models/essential/bed/bed1/scene.gltf',
         './models/essential/bath/bath2/scene.gltf',
+        './models/essential/door/door/scene.gltf',
     ];
 
     for (let i = 0; i < furnitureArray.length; i++) {
@@ -304,8 +307,12 @@ function initFurniture() {
                     bedInstance.add();
                     break;
                 case 3:
-                    const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 18, y: 0, z: 150}, false, 0);
+                    const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 18, y: 0, z: 130}, false, 0);
                     bathInstance.add();
+                    break;
+                case 4:
+                    const doorInstance = new Furniture(scene, furnitureArray[i], 'door', {x: 1, y: 0, z: 206}, false, 90, 50);
+                    doorInstance.add();
                     break;
                 default:
                     console.error('알 수 없는 가구 인덱스입니다.');

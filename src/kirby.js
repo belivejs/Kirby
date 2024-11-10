@@ -492,6 +492,8 @@ class Kirby{
 
                 // 행복도 증가
                 
+            } else if (name == 'door'){
+                window.open('outdoor_index.html', '_self');
             }
             //키보드 이벤트 다시 세팅
             document.addEventListener('keydown', this.keydownEvent);
