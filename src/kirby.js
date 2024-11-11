@@ -531,41 +531,40 @@ class Kirby{
     //커비 옮기기 moveX, moveZ만큼
     moveKirby(){
         const box = new THREE.Box3().setFromObject(this._collisionFurniture);
-        const size = new THREE.Vector3();
-        box.getSize(size);
-
-        const moveX = size.x * 1;
-        const moveZ = size.z * 1;
+        const distance = 15;
         
         //캐릭터 이동
         if(this._model.position.x >= 0 && this._model.position.x < House.groundWidth/2 && this._model.position.z <= House.groundLength/2){
-            this._model.position.x += moveX;
+            this._model.position.x = box.max.x + distance;
             this._model.position.y = 0;
-            this._model.position.z += moveZ; 
+            this._model.position.z = box.max.z + distance;
         } else if (this._model.position.x > House.groundWidth/2 && this._model.position.z <= House.groundLength/2) {
-            this._model.position.x -= moveX;
+            this._model.position.x = box.min.x - distance;
             this._model.position.y = 0;
-            this._model.position.z += moveZ; 
+            this._model.position.z = box.max.z + distance;
         } else if (this._model.position.x >= 0 && this._model.position.x < House.groundWidth/2 && this._model.position.z > House.groundLength/2) {
-            this._model.position.x += moveX;
+            this._model.position.x = box.max.x + distance;
             this._model.position.y = 0;
-            this._model.position.z -= moveZ; 
+            this._model.position.z = box.min.z - distance;
         } else if (this._model.position.x > House.groundWidth/2 && this._model.position.z > House.groundLength/2) {
-            this._model.position.x -= moveX;
+            this._model.position.x = box.min.x - distance;
             this._model.position.y = 0;
-            this._model.position.z -= moveZ; 
+            this._model.position.z = box.min.z - distance;
         }
 
         
-        //카메라 이동
-        this._camera.position.x += moveX;
-        this._camera.position.z += moveZ;
-        //카메라가 바라보는 타겟을 캐릭터로 
+        // // 카메라 이동: x와 z 좌표는 모델 위치에 맞추고, y는 모델보다 높은 값으로 설정
+        // this._camera.position.x = this._model.position.x;
+        // this._camera.position.y = this._model.position.y + 10;  // 모델보다 10만큼 위로 위치
+        // this._camera.position.z = this._model.position.z + 10;  // 모델보다 약간 뒤쪽으로 위치
+
+        // 카메라가 바라보는 타겟을 캐릭터로 설정
         this._controls.target.set(
             this._model.position.x,
             this._model.position.y,
             this._model.position.z,
         );
+
     }
 
     render(time) {
