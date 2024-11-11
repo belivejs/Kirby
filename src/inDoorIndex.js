@@ -300,8 +300,22 @@ function furnitureUI() {
             delButton.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if (furnitureInstance) {
-                    furnitureInstance.hide(); // scene에서 가구 숨기기
-                    furnitureInstance = null; // 인스턴스 제거
+            
+                    // scene에서 완전히 제거
+                    scene.remove(furnitureInstance.model);
+            
+                    // `Furniture.furnitureModelList`에서 제거하여 충돌 감지에서 제외
+                    const index = Furniture.furnitureModelList.indexOf(furnitureInstance.model);
+                    if (index > -1) {
+                        Furniture.furnitureModelList.splice(index, 1); // 리스트에서 해당 모델 제거
+                        furnitureInstance = false;
+                    }
+            
+                    // sessionStorage에서 제거하기
+                    const updatedFurniture = purchasedFurniture.filter(f => f.name !== item.name); // 해당 가구를 제외한 배열 생성
+                    sessionStorage.setItem('purchasedFurniture', JSON.stringify(updatedFurniture)); // 업데이트된 배열을 세션 스토리지에 저장
+                    console.log("삭제완료");
+                    //furnitureInstance = null; // 인스턴스 제거
                     itemName.style.color = 'black'; // 숨기기 후 검은색으로 복구
                 }
             });
