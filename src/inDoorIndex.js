@@ -241,6 +241,10 @@ const furnitureArray = [
     './models/essential/bath/bath3/scene.gltf',
 ];
 
+const doorInstance = new Furniture(scene,'./models/essential/door/door/scene.gltf', 'door', {x: 1, y: 0, z: 206}, false, 90, 50);
+doorInstance.add();
+
+
 function furnitureUI() {
     document.getElementById('menu-toggle').addEventListener('click', function(e) {
         e.preventDefault();
@@ -343,36 +347,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-
-// function initFurniture() {
-
-//     for (let i = 0; i < furnitureArray.length; i++) {
-//         try{
-//             switch (i) {
-//                 case 0:
-//                     const deskInstance = new Furniture(scene, furnitureArray[i], "desk", {x:17, y:2.5041244718755564, z:9});
-//                     deskInstance.add(false, 90);
-//                     break;
-//                 case 1:
-//                     const chairInstance = new Furniture(scene, furnitureArray[i], 'chair', {x:22, y:12.500000000000012, z:21});
-//                     chairInstance.add(false, 180);
-//                     break;
-//                 case 2:
-//                     const bedInstance = new Furniture(scene, furnitureArray[i], 'bed', {x:88, y:22.499983113709934, z:30});
-//                     bedInstance.add(false, 0);
-//                     break;
-//                 case 3:
-//                     const bathInstance = new Furniture(scene, furnitureArray[i], 'bath', {x: 2, y: 3.332235320347188, z: 79});
-//                     bathInstance.add(false, 0);
-//                     break;
-//                 default:
-//                     console.error('알 수 없는 가구 인덱스입니다.');
-//             }
-//         }catch(e){
-//             console.log(e)
-//         }
-//     }
-// }
 
 // 애니메이션 루프
 function animate() {

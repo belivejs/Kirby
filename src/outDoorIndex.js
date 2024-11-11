@@ -191,9 +191,8 @@ function init(){
     initializeProgressBar();
     addGrass();
     addFence();
-    
-    //keyboard event
-    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+    addDoor();
+
 }
 
 function animate() {
@@ -358,6 +357,14 @@ function controlProgressBar(changeValue) {
         showOverlayMessage("fail-text");
         clearInterval(intervalId); // 0%에 도달하면 반복 중지
     }
+}
+
+function addDoor(){
+    let doorPath = './models/essential/door/door/scene.gltf';
+    const doorInstance = new Furniture(scene, doorPath, 'door', {x:59, y:0, z: 55}, false, 0, 15);
+    doorInstance.add(false, () => {
+        doorInstance.model.visible = false;
+    });
 }
 
 // Function to display overlay message

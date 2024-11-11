@@ -30,8 +30,7 @@ class Furniture {
     }
 
 
-    add(ifSelect=true, rotate=0) {
-
+    add(ifscale=true, callback=null) {
         const loader = new GLTFLoader();
         loader.load(this.path, (gltf) => {
             this.model = gltf.scene;
@@ -58,12 +57,10 @@ class Furniture {
             if(this.ifSelect){
                 Furniture.currentFurniture = this;
             }
-            console.log("rotate전까지");
+
             this.rotate(this.rotateDeg);
 
-            console.log("add전까지");
             this.scene.add(this.model);
-            console.log("모델 : ", this.model);
 
             if (callback) callback();
             
@@ -81,7 +78,7 @@ class Furniture {
             rotateDeg: furniture.rotateDeg,
             scaleY: furniture.scaleY
         })));
-        localStorage.setItem("furniture", data);
+        sessionStorage.setItem("furniture", data);
     }
 
     rotate(angle) {
