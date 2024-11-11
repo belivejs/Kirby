@@ -25,8 +25,7 @@ class Furniture {
         }
     }
 
-    
-    add(ifSelect=true) {
+    add(ifSelect = true) {
         const loader = new GLTFLoader();
         loader.load(this.path, (gltf) => {
             this.model = gltf.scene;
@@ -55,6 +54,7 @@ class Furniture {
             this.rotate(this.rotateDeg);
 
             this.scene.add(this.model);
+
         });
     }
 

@@ -590,7 +590,7 @@ class Kirby{
 
     // 30초마다 무작위로 Kirby를 sleep 상태로 변경
     initiateRandomSleep() {
-        var random = Math.floor(Math.random() *  1000);
+        var random = Math.floor(Math.random() *  100);
         setInterval(() => {
             if (this._model && !this.hasSlept) {  
                 this.hasSlept = true;
@@ -599,12 +599,12 @@ class Kirby{
                 this.changeBobyTexture(this._model, "texture/kirby/Kirby_sleeping.jpg");
                 this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_sleeping.jpg");
             }
-        }, random*100); 
+        }, random*10); 
     }
 
     // 30초마다 무작위로 Kirby를 sleep 상태로 변경
     initiateRandomDirty() {
-        var random = Math.floor(Math.random() *  1000);
+        var random = Math.floor(Math.random() *  100);
         setInterval(() => {
             if (this._model && !this.hasSlept && !this.isDirty) {  
                 this.isDirty = true;
@@ -613,7 +613,7 @@ class Kirby{
                 this.changeBobyTexture(this._model, "texture/kirby/Kirby_dirty.jpg");
                 this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_dirty.jpg");
             }
-        }, random*100); 
+        }, random*10);
     }
 }
 

@@ -27,7 +27,7 @@ export function initializeTimer(ticks, sunLight, moonLight, sunMesh, moonMesh, t
         const currentTime = Date.now();
         const elapsedTime = currentTime - startTime;
 
-        const radius = 400; // 회전 반경
+        const radius = 600; // 회전 반경
         const time = (Date.now() - startTime) * 0.001; // 경과 시간을 사용하여 시간 계산
 
         // 태양 회전 위치 업데이트 (y축을 z축으로 변환, z축을 y축으로 변환)

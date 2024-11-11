@@ -31,7 +31,7 @@ let kirby;
 let grassGeometry;
 //태양 달 효과
 let updatePositions; // 회전 로직을 저장하는 변수
-let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
+let gameTicks = 30; // game이 흘러가는 시간 비율, 1분에 하루
 let sunMesh, moonMesh;
 
 progressBar = document.getElementById("progressBar");
@@ -105,29 +105,37 @@ function init(){
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
 
-    //광원 추가
+    const textureLoader = new THREE.TextureLoader();
+
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
-    const sunLight = new THREE.PointLight(sunColor, 50000);
+    const sunLight = new THREE.PointLight(sunColor, 100000);
     sunLight.castShadow = true;
     scene.add(sunLight);
 
     // 태양을 표현하기 위한 구체 추가
-    const sunGeometry = new THREE.SphereGeometry(1, 128, 128); // 태양 크기
-    const sunMaterial = new THREE.MeshBasicMaterial({ color: sunColor });
+    const sunTexture = textureLoader.load('./texture/sun.jpg'); // 경로에 맞게 수정
+    const sunMaterial = new THREE.MeshBasicMaterial({
+        map: sunTexture,
+        color:sunColor
+      });
+    const sunGeometry = new THREE.SphereGeometry(40, 128, 128); // 태양 크기
     sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sunMesh); // 씬에 추가
 
     // 달 light source 추가
-    // const moonColor = 0xbfc1c2;
     const moonColor = 0xbfc1c2;
     const moonLight = new THREE.PointLight(moonColor, 50000);
     moonLight.castShadow = true;
     scene.add(moonLight);
 
     // 달을 표현하기 위한 구체 추가
-    const moonGeometry = new THREE.SphereGeometry(1, 128,128); // 달 크기
-    const moonMaterial = new THREE.MeshBasicMaterial({ color: moonColor });
+    const moonTexture = textureLoader.load('./texture/moon.png'); // 경로에 맞게 수정
+    const moonMaterial = new THREE.MeshBasicMaterial({
+        map: moonTexture,
+        color:moonColor
+      });
+    const moonGeometry = new THREE.SphereGeometry(40, 128, 128); // 달 크기
     moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
     scene.add(moonMesh); // 씬에 추가
 
@@ -319,4 +327,4 @@ initializeProgressBar();
 init();
 animate();
 // Progress가 계속 증가하는 interval 설정
-intervalId = setInterval(() => controlProgressBar(3), 5000);
+intervalId = setInterval(() => controlProgressBar(3), 10000);
