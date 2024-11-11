@@ -438,8 +438,11 @@ class Kirby{
             document.removeEventListener('keyup', this.keyupEvent);
             this._pressedKeys = {}
 
+            // 충돌한 가구 중심 구하기
+            const box = new THREE.Box3().setFromObject(this._collisionFurniture);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
             
-            console.log(this._collisionFurniture.position);
             if(name == 'bath'){
                 if(this.isDirty) {
                     this._controlProgressBar(5);
@@ -449,14 +452,14 @@ class Kirby{
                 }
 
                 this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    3,
-                    this._collisionFurniture.position.z,
+                    center.x,
+                    center.y,
+                    center.z,
                 );
                 this._bubbleModel.position.set(
-                    this._collisionFurniture.position.x,
-                    12,
-                    this._collisionFurniture.position.z,
+                    center.x,
+                    center.y,
+                    center.z,
                 )
                 this._bubbleModel.visible = true;
                 this._bubbleAnimationMap['bubble'].play();
@@ -476,9 +479,9 @@ class Kirby{
                 }
 
                 this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    this._collisionFurniture.position.y/2,
-                    this._collisionFurniture.position.z,
+                    center.x,
+                    center.y,
+                    center.z,
                 );
                 await this.changeAnimation("sleep");
 
@@ -493,9 +496,9 @@ class Kirby{
                 this._controlProgressBar(-5);
 
                 this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    this._collisionFurniture.position.y/1.5,
-                    this._collisionFurniture.position.z,
+                    center.x,
+                    center.y,
+                    center.z,
                 );
                 await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true);
                 this.moveKirby()

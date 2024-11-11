@@ -64,6 +64,10 @@ class Furniture {
 
             if (callback) callback();
             
+            // 박스 시각화
+            const modelBox = new THREE.Box3().setFromObject(this.model);
+            const boxHelper = new THREE.Box3Helper(modelBox, 0xff0000);  // 박스 색상 설정
+            this.scene.add(boxHelper);
         });
     }
 
