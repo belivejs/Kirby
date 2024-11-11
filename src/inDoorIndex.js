@@ -80,13 +80,15 @@ function init(){
 
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
+    const textureLoader = new THREE.TextureLoader();
+    const sunTexture = textureLoader.load('./texture/sun.jpg');
     const sunLight = new THREE.PointLight(sunColor, 500000)
     sunLight.castShadow = true;
     scene.add(sunLight);
 
     // 태양을 표현하기 위한 구체 추가
     const sunGeometry = new THREE.SphereGeometry(1, 32, 32); // 태양 크기
-    const sunMaterial = new THREE.MeshBasicMaterial({ color: sunColor });
+    const sunMaterial = new THREE.MeshBasicMaterial({map : sunTexture, color: sunColor });
     sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sunMesh); // 씬에 추가
 
@@ -221,8 +223,9 @@ const furnitureArray = [
     './models/essential/desk/desk2/scene.gltf',
     './models/essential/chair/chair1/scene.gltf',
     './models/essential/bed/bed1/scene.gltf',
-    './models/essential/bath/bath3/scene.gltf',
+    './models/essential/bath/bath2/scene.gltf',
 ];
+
 
 function furnitureUI() {
     document.getElementById('menu-toggle').addEventListener('click', function(e) {
@@ -235,71 +238,59 @@ function furnitureUI() {
         const furnitureList = document.getElementById('furniture-list');
         furnitureList.innerHTML = '';
 
-        // sessionStorage에서 구매한 가구 불러오기
+        // sessionStorage에서 가구 상태 복원
+        loadFurnitureStateFromSession();
+
         const purchasedFurniture = JSON.parse(sessionStorage.getItem('purchasedFurniture')) || [];
 
-        // 기본 가구 배열 (furnitureArray)와 구매한 가구 배열 합치기
         const allFurniture = [
-            ...furnitureArray.map(path => ({ name: path.split('/')[3], modelPath: path })), // 기본 가구들
-            ...purchasedFurniture // 구매한 가구들
+            ...furnitureArray.map(path => ({ name: path.split('/')[3], modelPath: path })),
+            ...purchasedFurniture
         ];
 
-        // 모든 가구를 메뉴에 표시
         allFurniture.forEach(item => {
             const listItem = document.createElement('li');
             listItem.style.display = 'flex';
             listItem.style.justifyContent = 'space-between';
             listItem.style.alignItems = 'center';
 
-            // 숫자를 떼어낸 기본 이름 추출
             const furnitureBaseName = item.name.replace(/\d+$/, '');
-
             const itemName = document.createElement('a');
             itemName.href = '#';
             itemName.textContent = item.name;
             listItem.appendChild(itemName);
 
-            // 가구가 사용 중일 경우 글자 색을 빨간색으로 설정
             let furnitureInstance = Furniture.furnitureList.find(f => f.furnitureName === item.name);
             if (furnitureInstance) {
-                itemName.style.color = 'red'; // 이미 scene에 추가된 경우 빨간색으로 표시
+                itemName.style.color = 'red';
             }
 
-            // del 버튼 생성
             const delButton = document.createElement('button');
             delButton.textContent = 'del';
             delButton.style.marginLeft = 'auto';
 
-            // 가구 클릭 시 scene에 추가
+            // 가구 클릭 시 scene에 추가 및 sessionStorage에 상태 저장
             itemName.addEventListener('click', function() {
                 if (!furnitureInstance) {
-                    furnitureInstance = new Furniture(scene, item.modelPath, furnitureBaseName); // 숫자 제거한 이름으로 생성
-                    furnitureInstance.add(); // scene에 가구 추가
-                    itemName.style.color = 'red'; // 추가 후 빨간색으로 변경
+                    furnitureInstance = new Furniture(scene, item.modelPath, furnitureBaseName);
+                    furnitureInstance.add();
+                    saveFurnitureStateToSession();
+                    itemName.style.color = 'red';
                 }
             });
 
-            // del 버튼 클릭 시 가구 숨기기
+            // 가구 삭제 시 sessionStorage에서 해당 가구 제거
             delButton.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if (furnitureInstance) {
-            
-                    // scene에서 완전히 제거
                     scene.remove(furnitureInstance.model);
-            
-                    // `Furniture.furnitureModelList`에서 제거하여 충돌 감지에서 제외
                     const index = Furniture.furnitureModelList.indexOf(furnitureInstance.model);
                     if (index > -1) {
-                        Furniture.furnitureModelList.splice(index, 1); // 리스트에서 해당 모델 제거
+                        Furniture.furnitureModelList.splice(index, 1);
                         furnitureInstance = false;
                     }
-            
-                    // sessionStorage에서 제거하기
-                    const updatedFurniture = purchasedFurniture.filter(f => f.name !== item.name); // 해당 가구를 제외한 배열 생성
-                    sessionStorage.setItem('purchasedFurniture', JSON.stringify(updatedFurniture)); // 업데이트된 배열을 세션 스토리지에 저장
-                    console.log("삭제완료");
-                    //furnitureInstance = null; // 인스턴스 제거
-                    itemName.style.color = 'black'; // 숨기기 후 검은색으로 복구
+                    saveFurnitureStateToSession();
+                    itemName.style.color = 'black';
                 }
             });
 
@@ -308,6 +299,35 @@ function furnitureUI() {
         });
     });
 }
+
+// 가구 상태를 sessionStorage에 저장
+function saveFurnitureStateToSession() {
+    const furnitureData = Furniture.furnitureList.map(furniture => ({
+        name: furniture.furnitureName,
+        path: furniture.path,
+        position: {
+            x: furniture.model.position.x,
+            y: furniture.model.position.y,
+            z: furniture.model.position.z
+        },
+        rotateDeg: furniture.rotateDeg,
+        scaleY: furniture.scaleY
+    }));
+    sessionStorage.setItem('furnitureData', JSON.stringify(furnitureData));
+}
+
+// sessionStorage에서 가구 상태 복원
+function loadFurnitureStateFromSession() {
+    const storedFurnitureData = JSON.parse(sessionStorage.getItem('furnitureData')) || [];
+    storedFurnitureData.forEach(item => {
+        const furnitureInstance = new Furniture(scene, item.path, item.name, item.position, true, item.rotateDeg, item.scaleY);
+        furnitureInstance.add(false); 
+        Furniture.furnitureList.push(furnitureInstance); 
+    });
+}
+
+window.addEventListener("beforeunload", saveFurnitureStateToSession);
+
 
 
 
@@ -465,6 +485,11 @@ function showOverlayMessage(messageId) {
     document.getElementById(messageId).style.display = "block";
 }
 
+window.addEventListener("beforeunload", function() {
+    Furniture.saveToLocalStorage();
+    Trash.saveTrashCount();    
+});
+
 
 // Initialize progressBar at the very beginning
 initializeProgressBar();
@@ -472,7 +497,7 @@ checkAndInitializeStorage();
 init();
 furnitureUI();
 chooseFurniture();
-var trash = new Trash(scene, 1000, 5, controlProgressBar, updateProgressBar);
+var trash = new Trash(scene, 5000, 5, controlProgressBar, updateProgressBar);
 trash.randomTrash();
 animate();
 // Progress가 계속 증가하는 interval 설정
