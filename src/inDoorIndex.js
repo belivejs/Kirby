@@ -252,7 +252,6 @@ function furnitureUI() {
             listItem.style.justifyContent = 'space-between';
             listItem.style.alignItems = 'center';
 
-            const furnitureBaseName = item.name.replace(/\d+$/, '');
             const itemName = document.createElement('a');
             itemName.href = '#';
             itemName.textContent = item.name;
@@ -270,7 +269,7 @@ function furnitureUI() {
             // 가구 클릭 시 scene에 추가 및 sessionStorage에 상태 저장
             itemName.addEventListener('click', function() {
                 if (!furnitureInstance) {
-                    furnitureInstance = new Furniture(scene, item.modelPath, furnitureBaseName);
+                    furnitureInstance = new Furniture(scene, item.modelPath, item.name);
                     furnitureInstance.add();
                     saveFurnitureStateToSession();
                     itemName.style.color = 'red';
@@ -482,11 +481,6 @@ function showOverlayMessage(messageId) {
     overlay.style.display = "flex";
     document.getElementById(messageId).style.display = "block";
 }
-
-window.addEventListener("beforeunload", function() {
-    Furniture.saveToLocalStorage();
-    Trash.saveTrashCount();    
-});
 
 
 // Initialize progressBar at the very beginning

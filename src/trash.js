@@ -11,11 +11,9 @@ class Trash {
         this.path = "./models/essential/trash/trash/scene.gltf";
         this._controlProgressBar = controlProgressBar;
         this._updateProgressBar = updateProgressBar;
-
         // 기존 쓰레기 데이터 복원 (progressBar 감소 X)
         this.restoreTrash();
     }
-
     // 기존 쓰레기 데이터 복원 함수 (progressBar 조작 없음)
     restoreTrash() {
         const savedTrash = JSON.parse(sessionStorage.getItem("trashData")) || [];
@@ -37,8 +35,7 @@ class Trash {
                 trash.add(false);
                 
                 Trash.currentTrashCount++;
-                this._controlProgressBar(-5); // progressBar 감소는 처음 생성 시에만
-
+                this._controlProgressBar(-5);
                 // 쓰레기 위치 저장
                 this.saveTrashPosition({ x: randomX, z: randomZ });
             }
@@ -51,16 +48,8 @@ class Trash {
         savedTrash.push(trashPosition);
         sessionStorage.setItem("trashData", JSON.stringify(savedTrash));
     }
-
     static downCount() {
         Trash.currentTrashCount--;
-        
-        // currentTrashCount를 로컬 저장소에 저장
-        Trash.saveTrashCount();
-    }
-
-    static saveTrashCount() {
-        localStorage.setItem('currentTrashCount', Trash.currentTrashCount);
     }
 }
 

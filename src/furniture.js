@@ -10,7 +10,7 @@ class Furniture {
     constructor(scene, path, furnitureName, position = { x: 25, y: 0, z: 25 }, rotateDeg=0, scaleY = 20) {
         this.scene = scene;
         this.path = path;
-        this.furnitureName = furnitureName;
+        this.furnitureName = furnitureName.replace(/\d+/g, '');
         this.model = null;
         this.object3D = null;
         this.position = position;
