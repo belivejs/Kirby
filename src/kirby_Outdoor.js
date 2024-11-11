@@ -7,30 +7,28 @@ import House from './house';
 
 
 class Kirby{
-    constructor(scene, renderer, camera, orbitControls, controlProgressBar, updateProgressBar){
+    constructor(scene, renderer, camera, orbitControls, setScale, controlProgressBar, updateProgressBar){
         this._scene = scene;
         this._renderer = renderer;
         this._camera = camera;
         this._controls = orbitControls;
         this._controlProgressBar = controlProgressBar;
         this._updateProgressBar = updateProgressBar;
-
-        this.hasSlept = false; // sleep 상태 여부
-        this.isDirty = false;  // dirty 상태 여부
+        this._scale = setScale;
 
         this._setupModel();
         this._setupBubbleModel();
         this._setupControl();
 
-        
+
         requestAnimationFrame(this.render.bind(this));
     }
 
     //커비 모델 불러오고 애니메이션 세팅
     _setupModel(path = './data/kirby_base.glb'){
         new GLTFLoader().load(path, (gltf) => {
-            var scale = 0.15;
-            
+            var scale = this._scale;
+
             //커비 에셋을 scene에 등록
             const model = gltf.scene;
             var mesh = gltf.scene.children[0];
@@ -55,10 +53,8 @@ class Kirby{
             this._kirbyBox = kirbyBox;
 
 
-            this.setupAnimations();
-            this.setupTexture();
-            this.initiateRandomSleep();
-            this.initiateRandomDirty();
+            // this.setupAnimations();
+            // this.setupTexture();
         })
     }
 
@@ -66,7 +62,7 @@ class Kirby{
     _setupBubbleModel(path = './data/cloud.glb'){
         new GLTFLoader().load(path, (gltf) => {
             var scale = 1.5;
-            
+
             //에셋을 scene에 등록
             const model = gltf.scene;
             var mesh = gltf.scene.children[0];
@@ -127,7 +123,7 @@ class Kirby{
             this._maxSpeed = 0;
             this._acceleration = 0;
         }
-        
+
         this.smoothChange(previousAnimationAction); 
     }
 
@@ -163,7 +159,7 @@ class Kirby{
         return new Promise((resolve)=>{
             var previousAnimationAction = this._currentAnimationAction;
             this._currentAnimationAction = this._animationMap[animationName];
-        
+
 
             //애니메이션 마지막 프레임에서 고정하도록 옵션 설정
             if(this._currentAnimationAction && clamp){
@@ -176,6 +172,11 @@ class Kirby{
 
             //실행
             this.smoothChange(previousAnimationAction)
+
+            // work 애니메이션일 때 돈 업데이트
+            if (animationName === "work") {
+                this.updateMoney(10000); // 10000원 추가
+            }
 
             //두번째 애니메이션
             if(nextAnimation){
@@ -342,6 +343,7 @@ class Kirby{
             //카메라가 바라보는 방향 가져오기
             const walkDirection = new THREE.Vector3();
             this._camera.getWorldDirection(walkDirection);
+
             walkDirection.y = 0; //위아래 이동x
             walkDirection.normalize();
             walkDirection.applyAxisAngle(new THREE.Vector3(0,1,0), this._directionOffset()); //누른 방향으로 보정
@@ -358,7 +360,8 @@ class Kirby{
             newPosition.set(this._model.position.x + moveX, this._model.position.y, this._model.position.z + moveZ)
             if(!this._doAction){//액션 없을 때
                 if(!this.checkCollision(newPosition)){
-                    if(newPosition.x <= House.groundWidth && newPosition.z <= House.groundLength){
+                    // console.log(this._model.position);
+                    if((3 <= this._model.position.x && this._model.position.x <= 97&& 4 <= this._model.position.z && this._model.position.z <= 97)){
                         //캐릭터 이동
                         this._model.position.x += moveX;
                         this._model.position.y = 0;
@@ -373,11 +376,40 @@ class Kirby{
                             this._model.position.z,
                         );     
                     }
+                    else{ // 팬스 밖으로 못나가게 설정
+                        if(this._model.position.x < 3)
+                            this._model.position.x = 4;
+                        else if(this._model.position.x > 97)
+                            this._model.position.x = 96;
+                        else if(this._model.position.z < 4)
+                            this._model.position.z = 5;
+                        else if(this._model.position.z > 97)
+                            this._model.position.z = 96;
+                    }
+                    // 왼쪽 충돌
+                    if(30 <= this._model.position.x && this._model.position.x <= 35 &&
+                        18 <= this._model.position.z && this._model.position.z <= 56)
+                        this._model.position.x = 30;    
+
+                    // 위쪽 충돌
+                    else if(33 <= this._model.position.x && this._model.position.x <= 66 &&
+                        17 <= this._model.position.z && this._model.position.z <= 20)
+                        this._model.position.z= 17;
+                    // 오른쪽 충돌
+                    else if(65 <= this._model.position.x && this._model.position.x <= 73 &&
+                        18 <= this._model.position.z && this._model.position.z <= 56)
+                        this._model.position.x = 74;
+                    // 아래쪽 충돌
+                    else if(33 <= this._model.position.x && this._model.position.x <= 66 &&
+                        52 <= this._model.position.z && this._model.position.z <= 56)
+                        this._model.position.z = 56;
+                    }
+
                 } else{ //부딪혔을때
-                    this.collisionAction()
+                    this.collisionAction();
                 }
             }
-        }
+
 
         // if(this._model)
         //     this.checkCollision()
@@ -397,12 +429,21 @@ class Kirby{
             // var furnitureHelper = new THREE.BoxHelper(furnitureModel, 0xff0000); // 빨간색 경계 상자
             // this._scene.add(furnitureHelper);
             // 상자가 겹치는지 확인
-            if (this._kirbyBox.intersectsBox(furnitureBox)) {
-                console.log('Kirby와 가구가 충돌했습니다!', Furniture.getFurnitureName(furnitureModel));
-                const preCollision = this._collisionFurniture;
-                this._collisionFurniture = furnitureModel;
-                return true;
-            }
+            // if (this._kirbyBox.intersectsBox(furnitureBox)) {
+            //     console.log('Kirby와 가구가 충돌했습니다!', Furniture.getFurnitureName(furnitureModel));
+            //     if (Furniture.getFurnitureName(furnitureModel) == "door") {
+            //         document.removeEventListener('keydown', this.keydownEvent);
+            //         document.removeEventListener('keyup', this.keyupEvent);
+            //         this._pressedKeys = {}
+            //         window.open('indoor_index.html', '_self'); // 외부 -> 내부 이동
+            //         //키보드 이벤트 다시 세팅
+            //         document.addEventListener('keydown', this.keydownEvent);
+            //         document.addEventListener('keyup', this.keyupEvent);
+            //     }
+            //     const preCollision = this._collisionFurniture;
+            //     this._collisionFurniture = furnitureModel;
+            //     return true;
+            // }
         }
         for (const wall of House.walls){
             const wallBox = new THREE.Box3().setFromObject(wall);
@@ -420,91 +461,10 @@ class Kirby{
     _doAction=false;
     async collisionAction(){
         const name = Furniture.getFurnitureName(this._collisionFurniture);
-        if (name != "desk") {//책상 부딪혔을떈 애니메이션 x
-            this._doAction = true;
-            this._speed = 0;
+        if (name == "door") {
             document.removeEventListener('keydown', this.keydownEvent);
             document.removeEventListener('keyup', this.keyupEvent);
             this._pressedKeys = {}
-
-            
-            console.log(this._collisionFurniture.position);
-            if(name == 'bath'){
-                if(this.isDirty) {
-                    this._controlProgressBar(5);
-                    this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-                    this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
-                    this.isDirty = false;
-                }
-
-                this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    3,
-                    this._collisionFurniture.position.z,
-                );
-                this._bubbleModel.position.set(
-                    this._collisionFurniture.position.x,
-                    12,
-                    this._collisionFurniture.position.z,
-                )
-                this._bubbleModel.visible = true;
-                this._bubbleAnimationMap['bubble'].play();
-                await this.changeAnimation("cleaning");
-
-                this._bubbleModel.visible = false;
-                this._bubbleAnimationMap['bubble'].stop();
-
-                this.moveKirby()
-                this.changeAnimation(null);
-            } else if (name == 'bed'){
-                if(this.hasSlept) {
-                    this._controlProgressBar(5);
-                    this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg")
-                    this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg")
-                    this.hasSlept = false;
-                }
-
-                this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    this._collisionFurniture.position.y/2,
-                    this._collisionFurniture.position.z,
-                );
-                await this.changeAnimation("sleep");
-
-                
-
-                this.moveKirby()
-                this.changeAnimation(null);
-
-            } else if (name == 'chair'){
-
-                this.updateMoney(2000); 
-                this._controlProgressBar(-5);
-
-                this._model.position.set(
-                    this._collisionFurniture.position.x,
-                    this._collisionFurniture.position.y/1.5,
-                    this._collisionFurniture.position.z,
-                );
-                await this.changeAnimation("seat", THREE.LoopOnce, null, 'work', true);
-                this.moveKirby()
-                this.changeAnimation(null);
-            } else if (name == 'trash'){
-                // 없애기가 안되서 안보이는 좌표로 날려버림
-                this._collisionFurniture.position.x = 9999;
-                this._collisionFurniture.position.y = 9999;
-                this._collisionFurniture.position.z = 9999;
-
-                // 쓰레기 현재 쓰레기 갯수 감소
-                Trash.downCount();
-
-                // 행복도 증가
-                this._controlProgressBar(5);
-            }
-            // else if (name == 'door'){
-            //     window.open('outdoor_index.html', '_self');
-            // }
-
             //키보드 이벤트 다시 세팅
             document.addEventListener('keydown', this.keydownEvent);
             document.addEventListener('keyup', this.keyupEvent);
@@ -517,9 +477,9 @@ class Kirby{
         const size = new THREE.Vector3();
         box.getSize(size);
 
-        const moveX = size.x * 1.5;
-        const moveZ = size.z * 1.5;
-        
+        const moveX = size.x * 1;
+        const moveZ = size.z * 1;
+
         //캐릭터 이동
         if(this._model.position.x >= 0 && this._model.position.x < House.groundWidth/2 && this._model.position.z <= House.groundLength/2){
             this._model.position.x += moveX;
@@ -539,7 +499,7 @@ class Kirby{
             this._model.position.z -= moveZ; 
         }
 
-        
+
         //카메라 이동
         this._camera.position.x += moveX;
         this._camera.position.z += moveZ;
@@ -560,61 +520,12 @@ class Kirby{
 
     updateMoney(amount) {
         // 현재 저장된 돈을 불러옵니다.
-        let currentMoney = parseInt(sessionStorage.getItem('money')) || 0;
+        let currentMoney = parseInt(localStorage.getItem('money')) || 0;
         currentMoney += amount; // 돈 추가
-        sessionStorage.setItem('money', currentMoney); // 로컬 스토리지에 저장
+        localStorage.setItem('money', currentMoney); // 로컬 스토리지에 저장
         console.log(`Updated Money: ${currentMoney}원`); // 콘솔로 확인
     }
 
-    // 행복도 업데이트 및 텍스처 변경 로직 추가
-    checkProgress() {
-        let currentProgress = parseInt(sessionStorage.getItem("progressBar"));
-        console.log("확인중 : ", currentProgress);
-
-        if (!this._model) {
-            console.warn("Kirby 모델이 아직 로드되지 않았습니다.");
-            return;
-        }
-    
-        // 행복도 수치가 20 이하일 때 텍스처 변경
-        if (currentProgress <= 20 && !this.isDirty && !this.hasSlept) {
-            this.changeBobyTexture(this._model, "texture/kirby/Kirby_angry.jpg");
-            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_angry.jpg");
-        }
-
-        else if(currentProgress > 20 && !this.isDirty && !this.hasSlept) {
-            this.changeBobyTexture(this._model, "texture/kirby/Kirby_base.jpg");
-            this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_base.jpg");
-        }
-    }
-
-    // 30초마다 무작위로 Kirby를 sleep 상태로 변경
-    initiateRandomSleep() {
-        var random = Math.floor(Math.random() *  1000);
-        setInterval(() => {
-            if (this._model && !this.hasSlept) {  
-                this.hasSlept = true;
-                this._controlProgressBar(-5);
-                console.log("Changing Kirby to sleep texture.");
-                this.changeBobyTexture(this._model, "texture/kirby/Kirby_sleeping.jpg");
-                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_sleeping.jpg");
-            }
-        }, random*100); 
-    }
-
-    // 30초마다 무작위로 Kirby를 sleep 상태로 변경
-    initiateRandomDirty() {
-        var random = Math.floor(Math.random() *  1000);
-        setInterval(() => {
-            if (this._model && !this.hasSlept && !this.isDirty) {  
-                this.isDirty = true;
-                this._controlProgressBar(-5);
-                console.log("Changing Kirby to dirty texture.");
-                this.changeBobyTexture(this._model, "texture/kirby/Kirby_dirty.jpg");
-                this.changeFaceTexture(this._model, "texture/kirby/Kirby-Face_dirty.jpg");
-            }
-        }, random*100); 
-    }
 }
 
 export default Kirby;

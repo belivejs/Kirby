@@ -5,18 +5,15 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { update } from 'three/examples/jsm/libs/tween.module.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import {initializeTimer} from './timer.js';
-
-var scene;
-var camera;
-var renderer;
-var controls;
+import Kirby from './kirby_Outdoor.js';
+import Furniture from './furniture.js';
+var scene, camera, renderer, controls;
 var loader = new GLTFLoader(); //3D data loader
 var progressBar;
-
-//key Code
-const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
 let intervalId;
-let kirby;
+let progress = 30;
+
+// let kirby;
 let house;
 let fenceGroup1;
 let fenceGroup2;
@@ -27,7 +24,11 @@ let fenceClone1;
 let fenceClone2;
 let fenceClone3;
 let fenceClone4;
+let houseBox;
+const LEFT = 65, RIGHT = 68, FRONT = 87, BACK = 83; //adws
+let kirby;
 
+let grassGeometry;
 //태양 달 효과
 let updatePositions; // 회전 로직을 저장하는 변수
 let gameTicks = 10; // game이 흘러가는 시간 비율, 1분에 하루
@@ -35,24 +36,37 @@ let sunMesh, moonMesh;
 
 progressBar = document.getElementById("progressBar");
 
-function checkAndInitializeStorage() {
-    // "isInitialized"라는 키가 없으면 새로 시작한 것이므로 초기화 진행
-    if (!sessionStorage.getItem("isInitialized")) {
-        sessionStorage.clear();
+// 가구 로드
+function furnitureUI() {
+    document.getElementById('menu-toggle').addEventListener('click', function(e) {
+        e.preventDefault();
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.style.display === 'none') {
+            sidebar.style.display = 'block';
+        } else {
+            sidebar.style.display = 'none';
+        }
+    });
 
-        // 초기 설정
-        sessionStorage.setItem("money", 0); // 돈을 10000원으로 초기화
-        sessionStorage.setItem("purchasedFurniture", JSON.stringify([])); // 구매한 가구를 빈 배열로 초기화
-        sessionStorage.setItem("isInitialized", true); // 초기화 여부 저장
-        console.log("프로젝트 초기화 완료");
-        sessionStorage.setItem("progressBar", 30); // Default progress value
-        sessionStorage.setItem("isFinish", "false"); // Reset finish status
-        isFinish = false; // Reset in-memory finish status
-        updateProgressBar(30); // Reset progress bar visually
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const furnitureList = document.getElementById('furniture-list');
+        furnitureList.innerHTML = '';
+
+        // 로컬 스토리지에서 구매한 가구 리스트 불러오기
+        const purchasedFurniture = JSON.parse(localStorage.getItem('purchasedFurniture')) || [];
+
+        purchasedFurniture.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<a href="#">${item.name}</a>`;
+            furnitureList.appendChild(listItem);
+
+            listItem.addEventListener('click', function() {
+                const furnitureInstance = new Furniture(scene, item.modelPath, item.name);
+                furnitureInstance.add();
+            });
+        });
+    });
 }
-
-
 
 function init(){
     scene = new THREE.Scene();
@@ -72,10 +86,29 @@ function init(){
         scene.background = texture;
     });
 
+
+    addGrass();
+    addFence();
+    //addDoor();
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x87CEEB);
+    document.body.appendChild(renderer.domElement);
+
+    camera.position.set(70, 60, 100);
+    camera.lookAt(0, 0, 0);
+
+    // OrbitControls 추가
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.enableZoom = true;
+
     //광원 추가
     // 태양 light source 추가
     const sunColor = 0xfff5e1;
-    const sunLight = new THREE.PointLight(sunColor, 500000);
+    const sunLight = new THREE.PointLight(sunColor, 50000);
     sunLight.castShadow = true;
     scene.add(sunLight);
 
@@ -100,52 +133,19 @@ function init(){
 
     // timer.js의 initializeTimer 함수로 회전 로직을 생성
     updatePositions = initializeTimer(gameTicks, sunLight, moonLight, sunMesh, moonMesh, scene, scene);
-    
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // 세기 조절 (0.5)
     scene.add(ambientLight);
-
-    kirby = new THREE.Object3D();
-    // 모델 로딩
-    loader.load(
-        './data/kirby_base.glb',  // 모델 경로 (GLB 또는 GLTF)
-         function (glb) {
-            glb.scene.scale.set(0.1, 0.1, 0.1);
-            glb.scene.position.set(15, 0, 10); // 모델을 왼쪽으로 이동
-            kirby = glb.scene;
-            scene.add(kirby);  // 씬에 모델 추가
-        },
-        undefined,
-        function (error) {
-            console.error(error);  // 로딩 중 에러 발생 시
-        }       
-    );
-
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x87CEEB);
-    document.body.appendChild(renderer.domElement);
-
-    camera.position.set(70, 60, 100);
-    camera.lookAt(0, 0, 0);
-
-    // OrbitControls 추가
-    controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = true;
-
-    // const light = new THREE.DirectionalLight(0xffffff, 4);
-    // light.position.set(0, 10, 10);
-    // scene.add(light);
-
-    // scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
     house = new THREE.Object3D();
     // 모델 로딩
     loader.load(
         './data/cartoon_house.glb',  // 모델 경로 (GLB 또는 GLTF)
          function (glb) {
+            house.position.set(93, -35, 0);
             house = glb.scene;
+            houseBox = new THREE.Box3().setFromObject(house);
+            // console.log(houseBox);
             house.scale.set(5, 5, 5);
             house.position.set(93, -35, 0); // 모델을 왼쪽으로 이동
             scene.add(house);  // 씬에 모델 추가
@@ -154,18 +154,12 @@ function init(){
         function (error) {
             console.error(error);  // 로딩 중 에러 발생 시
         }       
-    );
+    );  
 
-    // 집
-    // const house = new House(scene, 50);
-    // house.init();
+    kirby = new Kirby(scene, renderer, camera, controls, 0.05,controlProgressBar, updateProgressBar);
 
-    initializeProgressBar();
-    addGrass();
-    addFence();
-    
-    //keyboard event
-    document.addEventListener('keydown', moveKirbyByKeyBoard, false)
+
+    requestAnimationFrame(animate);
 }
 
 function animate() {
@@ -181,8 +175,7 @@ function animate() {
 
 function addGrass() {
     // 잔디용 평면 지오메트리 생성
-
-    const grassGeometry = new THREE.PlaneGeometry(120, 120, 2); 
+    grassGeometry = new THREE.PlaneGeometry(120, 120, 2); 
 
     const textureLoader = new THREE.TextureLoader();
     const textureBaseColor = textureLoader.load('./texture/Stylized/Stylized_Stone_Floor_007_BaseColor.png');
@@ -205,55 +198,6 @@ function addGrass() {
 
 
     scene.add(grass);
-}
-
-/**
- * Data 파일을 로드하고 씬에 추가하기 위한 함수입니다.
- * GLB 파일을 권장합니다.
- * @param {string} path 로드할 파일의 경로. (/data/[파일이름] 형식으로 작성합니다.)
- * @param {string} fileName 로드한 파일의 이름. console에 찍어서 데이터 형식을 확인하려고 사용함.
- * @returns {null} 리턴은 없는데 객체 형태로 내보내고 싶어요.. 근데 안됨
- * @example // 사용 예
- * DataLoader('data/kirby_pixar_3d.glb', '커비')
- * // 콘솔 결과
- * 커비 {scene: Group, scenes: Array(1), animations: Array(1), cameras: Array(0), asset: {…}, …}
- */
-// function dataLoader(path, target){
-//     loader.load(
-//         path, // 3D data 경로.
-//         function (gltf) { // Data 불러오는 함수
-//             target.add(gltf.scene);
-//         },
-//         undefined, 
-//         function (error) {// 실패 시 에러 출력
-//             console.error(error);
-//         }
-//     );
-// }
-
-/**
- * ADWS(왼오앞뒤) 키를 누르면 커비가 이동합니다 
- * @example document.addEventListener('keydown', moveKirbyByKeyBoard, false)
- */
-function moveKirbyByKeyBoard(e){
-    let moveDistance = 2;  // 이동 거리
-    let newPosition = new THREE.Vector3();
-
-    // 키 입력에 따른 캐릭터의 새로운 위치 설정
-    if (e.keyCode == LEFT) {
-        newPosition.set(-moveDistance, 0, 0);  // 왼쪽 이동
-    } else if (e.keyCode == RIGHT) {
-        newPosition.set(moveDistance, 0, 0);  // 오른쪽 이동
-    } else if (e.keyCode == FRONT) {
-        newPosition.set(0, 0, -moveDistance);  // 앞으로 이동
-    } else if (e.keyCode == BACK) {
-        newPosition.set(0, 0, moveDistance);  // 뒤로 이동
-    }
-
-    // 충돌 여부 확인 후 이동
-    if (!checkCollision(newPosition)) {
-        kirby.position.add(newPosition);  // 충돌하지 않으면 이동
-    }
 }
 
 function addFence() {
@@ -292,7 +236,7 @@ function addFence() {
         }
 
         // 동일한 울타리 복제하여 이어붙이기
-        
+
         for (let i = 0; i < 5; i++) {  // 10개의 울타리 이어붙이기
             fence.rotation.y = Math.PI / 2; // 90도 회전 (라디안으로 설정)
             fenceClone3 = fence.clone(); // 울타리 복제
@@ -313,30 +257,6 @@ function addFence() {
         scene.add(fenceGroup4);
     });
 }
-
-function checkCollision(newPosition) {
-    const kirbyBox = new THREE.Box3().setFromObject(kirby);
-    kirbyBox.translate(newPosition);  // 캐릭터의 이동할 위치로 Box를 이동
-
-    const houseBox = new THREE.Box3().setFromObject(house);
-
-    const fenceBox1 = new THREE.Box3().setFromObject(fenceGroup1);
-    const fenceBox2 = new THREE.Box3().setFromObject(fenceGroup2);
-    const fenceBox3 = new THREE.Box3().setFromObject(fenceGroup3);
-    const fenceBox4 = new THREE.Box3().setFromObject(fenceGroup4);
-
-    if (kirbyBox.intersectsBox(houseBox)) {
-        return true;  // 충돌 발생 시 true 반환
-    }
-
-    if (kirbyBox.intersectsBox(fenceBox1) || kirbyBox.intersectsBox(fenceBox2) 
-        || kirbyBox.intersectsBox(fenceBox3) || kirbyBox.intersectsBox(fenceBox4)) {
-        controlProgressBar(-5);
-        return true;  // 충돌 발생 시 true 반환
-    }
-    return false;
-}
-
 
 var isFinish = sessionStorage.getItem("isFinish") === "true" || false; // 로컬스토리지에서 완료 여부 가져오기
 
@@ -361,7 +281,6 @@ function controlProgressBar(changeValue) {
     currentProgress = Math.min(100, Math.max(0, currentProgress + changeValue)); // 제한 범위 설정
     updateProgressBar(currentProgress);
     console.log(currentProgress);
-
 
     // 성공 메시지
     if (currentProgress >= 100 && !isFinish) {
@@ -388,9 +307,16 @@ function showOverlayMessage(messageId) {
     document.getElementById(messageId).style.display = "block";
 }
 
-checkAndInitializeStorage();
-// Initialize progressBar at the very beginning
+// function addDoor(){
+//     let doorPath = './models/essential/door/door/scene.gltf';
+//     const doorInstance = new Furniture(scene, doorPath, 'door', {x:59, y:0, z: 55}, false, 0, 15);
+//     doorInstance.add(false, () => {
+//         doorInstance.model.visible = false;
+//     });
+//}
+
 initializeProgressBar();
 init();
 animate();
+// Progress가 계속 증가하는 interval 설정
 intervalId = setInterval(() => controlProgressBar(3), 5000);

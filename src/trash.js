@@ -2,7 +2,6 @@ import Furniture from './furniture.js';
 import House from './house.js';
 
 class Trash {
-
     static currentTrashCount = 0;
 
     constructor(scene, interval, max, controlProgressBar, updateProgressBar) {
@@ -38,7 +37,7 @@ class Trash {
                 trash.add(false);
                 
                 Trash.currentTrashCount++;
-                this._controlProgressBar(-5);
+                this._controlProgressBar(-5); // progressBar 감소는 처음 생성 시에만
 
                 // 쓰레기 위치 저장
                 this.saveTrashPosition({ x: randomX, z: randomZ });
@@ -55,8 +54,14 @@ class Trash {
 
     static downCount() {
         Trash.currentTrashCount--;
+        
+        // currentTrashCount를 로컬 저장소에 저장
+        Trash.saveTrashCount();
     }
 
+    static saveTrashCount() {
+        localStorage.setItem('currentTrashCount', Trash.currentTrashCount);
+    }
 }
 
 export default Trash;

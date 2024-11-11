@@ -7,14 +7,16 @@ class Furniture {
     static furnitureList = [];
     static furnitureModelList =[];
 
-    constructor(scene, path, furnitureName, position = { x: 25, y: 0, z: 25 }) {
+    constructor(scene, path, furnitureName, position = { x: 25, y: 0, z: 25 }, rotateDeg=0, scaleY = 20) {
         this.scene = scene;
         this.path = path;
         this.furnitureName = furnitureName;
         this.model = null;
         this.object3D = null;
         this.position = position;
-        this.scale = { x: 0.7, y: 0.7, z: 0.7 };
+        this.scale = { x: 1, y: 1, z: 1 };
+        this.rotateDeg = rotateDeg;
+        this.scaleY = scaleY;
     }
 
     hide() {
@@ -23,8 +25,8 @@ class Furniture {
         }
     }
 
-
-    add(ifSelect=true, rotate=0) {
+    
+    add(ifSelect=true) {
         const loader = new GLTFLoader();
         loader.load(this.path, (gltf) => {
             this.model = gltf.scene;
@@ -39,7 +41,6 @@ class Furniture {
             const multiple = 20 / size.y;
             this.model.scale.set(multiple, multiple, multiple);
 
-            // 높이 조정
             const modelBox = new THREE.Box3().setFromObject(this.model);
             const modelBottomY = modelBox.min.y;
             this.model.position.y += House.groundHeight - modelBottomY;
@@ -50,12 +51,10 @@ class Furniture {
             if(ifSelect){
                 Furniture.currentFurniture = this;
             }
-            console.log("rotate전까지");
-            this.rotate(rotate);
 
-            console.log("add전까지");
+            this.rotate(this.rotateDeg);
+
             this.scene.add(this.model);
-            console.log("모델 : ", this.model);
         });
     }
 

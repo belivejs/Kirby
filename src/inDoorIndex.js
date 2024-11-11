@@ -215,9 +215,7 @@ function chooseFurniture(){
     });
 }
 
-// 가구 로드 예시 코드
-// const furnitureInstance = new Furniture(scene, furniture, furnitureName);
-// furnitureInstance.add();
+
 
 const furnitureArray = [
     './models/essential/desk/desk2/scene.gltf',
