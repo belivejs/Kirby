@@ -8,12 +8,13 @@ A simulation game where you raise Kirby and decorate his house.
 
 # Installation
 1. Download node.js for use to npm
-2. Add repository and open Yejin branch folder into workspace of Visual Studio Code.
-3. Open terminal and install npm
+2. Download Yejin branch code.
+3. Add downloaded folder into workspace of Visual Studio Code.
+4. Open terminal in VSC and type install npm.
    ```
    npm install
    ```
-4. run npm
+5. run npm
    ```
    npm start
    ```
